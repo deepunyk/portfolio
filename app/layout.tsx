@@ -24,6 +24,13 @@ export const metadata: Metadata = {
   },
   description:
     "Lead engineer portfolio: backend systems, AI workflows, and practical writing on building support infrastructure.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

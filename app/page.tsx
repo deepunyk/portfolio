@@ -1,11 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 
-import {
-  focusAreas,
-  profile,
-  timeline,
-  whatDrivesMe,
-} from "@/content/site";
+import { focusAreas, profile, timeline } from "@/content/site";
 import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
 export default function Home() {
@@ -38,7 +34,7 @@ export default function Home() {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 md:px-10">
-        <section className="reveal surface-strong grid gap-10 rounded-3xl p-8 md:grid-cols-[1.45fr_1fr] md:p-10">
+        <section className="reveal surface-strong grid gap-10 rounded-3xl p-8 md:grid-cols-[1.3fr_0.95fr] md:p-10">
           <div className="space-y-6">
             <p className="inline-flex rounded-full border border-[var(--border)] bg-[var(--highlight)] px-3 py-1 text-xs font-medium tracking-wide text-[var(--accent)] uppercase">
               {profile.role}
@@ -66,18 +62,25 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="surface rounded-2xl p-5 md:p-6">
-            <p className="text-sm font-medium tracking-widest text-[var(--muted)] uppercase">
-              What Keeps Me In It
-            </p>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground)]">
-              {whatDrivesMe.map((item) => (
-                <li key={item} className="flex gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="surface relative overflow-hidden rounded-[2rem] p-3">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(15,118,110,0.2),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(241,216,164,0.26),transparent_30%)]" />
+            <Image
+              src="/deepak-nayak.png"
+              alt="Deepak Nayak smiling in a blue shirt."
+              width={768}
+              height={768}
+              priority
+              className="relative aspect-[4/5] w-full rounded-[1.5rem] object-cover object-center"
+            />
+            <div className="relative mx-4 mt-4 rounded-2xl border border-white/50 bg-[rgba(255,249,238,0.92)] px-4 py-3 shadow-[0_10px_30px_rgba(22,32,39,0.12)] md:absolute md:inset-x-7 md:bottom-7 md:mx-0 md:mt-0 md:bg-[rgba(255,249,238,0.88)] md:backdrop-blur">
+              <p className="text-[11px] font-medium tracking-[0.18em] text-[var(--muted)] uppercase">
+                Based in {profile.location}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--foreground)]">
+                I like backend work with awkward edges, system boundaries that
+                need care, and products people end up depending on every day.
+              </p>
+            </div>
           </div>
         </section>
 
