@@ -5,7 +5,7 @@ import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Engineering notes on backend systems, AI workflows, and product execution.",
+  description: "Notes from building backend systems, integrations, and the parts that only make sense after shipping them.",
 };
 
 export default function BlogPage() {
@@ -19,8 +19,8 @@ export default function BlogPage() {
         </Link>
         <h1 className="text-4xl md:text-5xl">Writing</h1>
         <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
-          Practical notes from building backend-heavy products, integrating AI into workflows,
-          and shipping with startup constraints.
+          Notes from work that taught me something concrete: integrations, backend systems,
+          and the awkward details that only show up once the product is live.
         </p>
       </header>
 
@@ -28,12 +28,30 @@ export default function BlogPage() {
         {posts.map((post) => (
           <article key={post.slug} className="surface rounded-2xl p-5 md:p-6">
             <p className="text-xs tracking-wider text-[var(--muted)] uppercase">
-              {formatPostDate(post.date)} | {post.readingMinutes} min read
+              {formatPostDate(post.date)}
+              {post.externalUrl
+                ? post.source
+                  ? ` | ${post.source}`
+                  : ""
+                : post.readingMinutes
+                  ? ` | ${post.readingMinutes} min read`
+                  : ""}
             </p>
             <h2 className="mt-3 text-3xl">
-              <Link href={`/blog/${post.slug}`} className="hover:text-[var(--accent)]">
-                {post.title}
-              </Link>
+              {post.externalUrl ? (
+                <a
+                  href={post.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--accent)]"
+                >
+                  {post.title}
+                </a>
+              ) : (
+                <Link href={`/blog/${post.slug}`} className="hover:text-[var(--accent)]">
+                  {post.title}
+                </Link>
+              )}
             </h2>
             <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">

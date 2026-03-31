@@ -2,10 +2,9 @@ import Link from "next/link";
 
 import {
   focusAreas,
-  impactStats,
-  interviewSignals,
   profile,
   timeline,
+  whatDrivesMe,
 } from "@/content/site";
 import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
@@ -45,7 +44,7 @@ export default function Home() {
               {profile.role}
             </p>
             <h1 className="max-w-3xl text-4xl leading-tight md:text-6xl">
-              Building reliable systems where chat, support, and AI meet.
+              I like taking fuzzy product problems and turning them into systems people can rely on.
             </h1>
             <p className="max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
               {profile.summary}
@@ -57,22 +56,22 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="rounded-full bg-[var(--foreground)] px-5 py-2.5 text-sm font-medium text-[var(--surface)] hover:bg-[#26323c]"
               >
-                View LinkedIn
+                LinkedIn
               </a>
               <a
                 href={`mailto:${profile.email}`}
                 className="rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-medium hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
-                Contact Me
+                Email Me
               </a>
             </div>
           </div>
           <div className="surface rounded-2xl p-5 md:p-6">
             <p className="text-sm font-medium tracking-widest text-[var(--muted)] uppercase">
-              Interview Signal
+              What Keeps Me In It
             </p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground)]">
-              {interviewSignals.map((item) => (
+              {whatDrivesMe.map((item) => (
                 <li key={item} className="flex gap-3">
                   <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
                   <span>{item}</span>
@@ -82,21 +81,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="reveal grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {impactStats.map((stat) => (
-            <article key={stat.label} className="surface rounded-2xl p-5">
-              <p className="text-2xl font-semibold text-[var(--foreground)]">{stat.value}</p>
-              <p className="mt-2 text-sm text-[var(--muted)]">{stat.label}</p>
-            </article>
-          ))}
-        </section>
-
         <section id="work" className="reveal space-y-6">
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl">What I Build</h2>
+            <h2 className="text-3xl md:text-4xl">The Work I Keep Getting Pulled Toward</h2>
             <p className="max-w-2xl text-[var(--muted)]">
-              Engineering that prioritizes business impact, stable operations,
-              and maintainable systems.
+              Usually it is a product sitting in the middle of too many systems,
+              some operational mess no one wants to think about, and a team
+              trying to move quickly without making the whole thing fragile.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -110,7 +101,7 @@ export default function Home() {
         </section>
 
         <section className="reveal space-y-6" id="about">
-          <h2 className="text-3xl md:text-4xl">Experience Snapshot</h2>
+          <h2 className="text-3xl md:text-4xl">A Few Stops Along The Way</h2>
           <div className="space-y-4">
             {timeline.map((entry) => (
               <article
@@ -137,7 +128,8 @@ export default function Home() {
             <div className="space-y-2">
               <h2 className="text-3xl md:text-4xl">Latest Writing</h2>
               <p className="text-sm text-[var(--muted)]">
-                Thoughts on backend engineering, AI workflows, and execution at startups.
+                Notes on backend engineering, AI workflows, product building,
+                and the parts of the job I keep coming back to.
               </p>
             </div>
             <Link href="/blog" className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-strong)]">
@@ -147,35 +139,56 @@ export default function Home() {
 
           <div className="grid gap-4 md:grid-cols-3">
             {latestPosts.map((post) => (
-              <Link
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                className="surface group rounded-2xl p-5"
-              >
-                <p className="text-xs tracking-wider text-[var(--muted)] uppercase">
-                  {formatPostDate(post.date)} | {post.readingMinutes} min read
-                </p>
-                <h3 className="mt-3 text-2xl group-hover:text-[var(--accent)]">{post.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.description}</p>
-              </Link>
+              post.externalUrl ? (
+                <a
+                  key={post.slug}
+                  href={post.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="surface group rounded-2xl p-5"
+                >
+                  <p className="text-xs tracking-wider text-[var(--muted)] uppercase">
+                    {formatPostDate(post.date)}
+                    {post.source ? ` | ${post.source}` : ""}
+                  </p>
+                  <h3 className="mt-3 text-2xl group-hover:text-[var(--accent)]">{post.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.description}</p>
+                </a>
+              ) : (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="surface group rounded-2xl p-5"
+                >
+                  <p className="text-xs tracking-wider text-[var(--muted)] uppercase">
+                    {formatPostDate(post.date)}
+                    {post.readingMinutes ? ` | ${post.readingMinutes} min read` : ""}
+                  </p>
+                  <h3 className="mt-3 text-2xl group-hover:text-[var(--accent)]">{post.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.description}</p>
+                </Link>
+              )
             ))}
           </div>
         </section>
 
         <section className="reveal surface-strong rounded-3xl p-8 text-center md:p-10">
           <p className="text-sm tracking-[0.18em] text-[var(--muted)] uppercase">
-            Open To Conversations
+            Say Hello
           </p>
-          <h2 className="mt-3 text-3xl md:text-4xl">Looking for teams that value depth and execution.</h2>
+          <h2 className="mt-3 text-3xl md:text-4xl">
+            If you are building something thoughtful, I would love to hear about it.
+          </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-            Based in {profile.location}. I enjoy difficult engineering problems,
-            fast feedback loops, and building products that users depend on daily.
+            I am based in {profile.location}. I like difficult engineering
+            problems, small teams with trust, and products that become part of
+            someone&apos;s daily work.
           </p>
           <a
             href={`mailto:${profile.email}`}
             className="mt-6 inline-flex rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent-strong)]"
           >
-            Start a Conversation
+            Reach Out
           </a>
         </section>
       </main>
