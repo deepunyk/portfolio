@@ -5,36 +5,29 @@ export const profile = {
   email: "deepaknayakp@outlook.com",
   linkedin: "https://www.linkedin.com/in/deepak-nayak-in",
   summary:
-    "I build production-grade backend systems, AI workflows, and deep integrations that turn conversational support into reliable operations.",
+    "I was the first engineer at ClearFeed, and that still describes the kind of work I enjoy most. Start with a fuzzy product problem, build the backend and integrations that make it real, then stay with it long enough to make it reliable for the people using it every day.",
 };
-
-export const impactStats = [
-  { label: "Years Building Product", value: "6+" },
-  { label: "ClearFeed Tenure", value: "4+ years" },
-  { label: "Projects Built During College", value: "25+" },
-  { label: "Integrations Built", value: "Slack, Teams, Jira, Zendesk, Salesforce" },
-];
 
 export const focusAreas = [
   {
-    title: "Backend Architecture",
+    title: "Ticketing On Top Of Chat",
     description:
-      "Designing ticketing and event systems that stay stable under real-time chat traffic.",
+      "Building support systems where Slack or Teams can be the front door without the backend turning into a knot.",
   },
   {
-    title: "AI in Production",
+    title: "Integration-Heavy Backend Work",
     description:
-      "Building AI helpers that classify requests, respond to common issues, and trigger real actions.",
+      "The kind of work where events, retries, SLAs, analytics, and awkward API edges all matter at the same time.",
   },
   {
-    title: "Cross-System Integrations",
+    title: "AI That Can Actually Help",
     description:
-      "Connecting chat surfaces to business tools without losing state, context, or observability.",
+      "Using AI for classification, replies, and tool-driven actions with clear boundaries, not just text generation for its own sake.",
   },
   {
-    title: "Engineering Leadership",
+    title: "Growing Strong Engineers",
     description:
-      "Mentoring engineers, shaping development workflows, and raising shipping quality.",
+      "Helping engineers get comfortable with ambiguous backend problems and eventually own the hard parts themselves.",
   },
 ];
 
@@ -44,34 +37,43 @@ export const timeline = [
     title: "Lead Engineer",
     period: "Mar 2024 - Present",
     detail:
-      "Leading backend engineering, building agentic workflow capabilities, and mentoring engineers across integrations and platform features.",
+      "I lead backend engineering here now. A lot of the work is still close to the metal: shaping agent workflows, reviewing tricky integration designs, improving internal engineering flow, and helping teammates turn messy requirements into systems we can ship and trust.",
   },
   {
     company: "ClearFeed",
     title: "Founding Engineer",
     period: "Aug 2021 - Mar 2024",
     detail:
-      "Built the backend from scratch: ticketing-on-chat architecture, event pipelines, analytics workflows, and AI-powered support automations.",
+      "I joined as the first engineer and built the backend from scratch: ticketing on top of Slack and Teams, real-time sync with tools like Zendesk, Jira, and Salesforce, event pipelines for analytics and SLAs, and early AI helpers that could classify, respond, create tickets, and trigger actions across other systems.",
   },
   {
     company: "JaanSay",
     title: "Full Stack Developer",
     period: "Aug 2020 - Jul 2021",
     detail:
-      "Built and operated a hyperlocal platform with Flutter + Node.js on a tight budget, covering development, deployment, and scaling.",
+      "Part of a two-person tech team building a hyperlocal platform from scratch with Flutter, Node.js, Nginx, and a tiny DigitalOcean budget. We handled product work, deployment, scaling, and customer onboarding ourselves, so every technical decision had to be simple and cheap enough to live with.",
   },
   {
     company: "3D Usher",
     title: "Full Stack Developer",
     period: "Dec 2020 - Feb 2021",
     detail:
-      "Developed geometry-aware instant quoting logic for 3D manufacturing and built the interface in Three.js.",
+      "Built a geometry-aware instant quoting system for 3D manufacturing instead of the usual bounding-box shortcuts. I had to learn enough about materials, manufacturing constraints, and pricing logic to make the Three.js interface and quoting flow produce numbers customers could actually trust.",
+  },
+  {
+    company: "Dreamsoft Innovations",
+    title: "Full Stack Developer",
+    period: "Apr 2020 - Oct 2020",
+    detail:
+      "My first serious production work. I built the Flutter side of a kids' digital library app, handled responsive UI across devices, and wired Flutter into a Unity-based story engine so the app experience and backend stayed in sync.",
   },
 ];
 
-export const interviewSignals = [
-  "Built and scaled a backend as the first engineer in a startup.",
-  "Shipped AI capabilities that execute real support workflows.",
-  "Deep experience in integrations across modern support stacks.",
-  "Hands-on leader who still builds critical systems end-to-end.",
+export const whatDrivesMe = [
+  "When a messy product problem finally turns into a system boundary I can work with.",
+  "Backend and integration work that is noisy under the hood but uneventful for the people using it.",
+  "Building from scratch, then staying with it long enough to smooth out the parts people would otherwise work around.",
+  "Problems that sit somewhere between product decisions, operational reality, and engineering detail.",
+  "Watching an engineer go from unsure to confidently owning a difficult part of the system.",
+  "Teams that care about craft, say the hard thing early, and do not get too precious about their own ideas.",
 ];

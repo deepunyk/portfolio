@@ -4,6 +4,8 @@ import path from "node:path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
 
+import { externalWriting } from "@/content/external-writing";
+
 const blogDirectory = path.join(process.cwd(), "content", "blog");
 
 type BlogFrontMatter = {
@@ -21,7 +23,9 @@ export type BlogPostMeta = {
   date: string;
   tags: string[];
   published: boolean;
-  readingMinutes: number;
+  readingMinutes?: number;
+  externalUrl?: string;
+  source?: string;
 };
 
 export type BlogPost = BlogPostMeta & {
@@ -81,9 +85,13 @@ function parsePost(slug: string) {
 }
 
 export function getAllPostsMeta() {
-  return getBlogFiles()
+  const localPosts = getBlogFiles()
     .map((fileName) => parsePost(toSlug(fileName)).meta)
-    .filter((post) => post.published)
+    .filter((post) => post.published);
+
+  const externalPosts = externalWriting.filter((post) => post.published);
+
+  return [...localPosts, ...externalPosts]
     .sort((a, b) => +new Date(b.date) - +new Date(a.date));
 }
 

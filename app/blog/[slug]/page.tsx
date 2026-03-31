@@ -58,7 +58,9 @@ const markdownComponents: Components = {
 };
 
 export function generateStaticParams() {
-  return getAllPostsMeta().map((post) => ({ slug: post.slug }));
+  return getAllPostsMeta()
+    .filter((post) => !post.externalUrl)
+    .map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
