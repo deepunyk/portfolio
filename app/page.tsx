@@ -17,7 +17,7 @@ export default function Home() {
         <p className="text-sm font-medium tracking-[0.22em] text-[#3f4b57] uppercase">
           {profile.name}
         </p>
-        <nav className="flex items-center gap-6 text-sm text-[#3f4b57]">
+        <nav className="flex items-center gap-4 text-sm text-[#3f4b57] md:gap-6">
           <a href="#work" className="hover:text-[var(--accent)]">
             Work
           </a>
@@ -27,7 +27,7 @@ export default function Home() {
           <a href="#about" className="hover:text-[var(--accent)]">
             About
           </a>
-          <Link href="/blog" className="hover:text-[var(--accent)]">
+          <Link href="/blog" className="hidden hover:text-[var(--accent)] md:inline">
             Blog
           </Link>
         </nav>
