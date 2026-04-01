@@ -55,63 +55,170 @@ That is where Graph becomes useful. It gives you a more product-friendly way to 
 
 Attachments are the part I would plan for earlier than most people do.
 
-The main thing is that not every Teams attachment behaves the same way. At a high level, I would think about them like this:
+The main thing is that not every Teams attachment behaves the same way. The first useful split for me was:
 
-- bot-hosted or inline attachments
-- regular files backed by Teams or SharePoint storage
+- files that come through the Bot Framework media path
+- files that live in the Teams or SharePoint file system and need Graph to resolve them
 
-That means your first step should be classification, not download.
+That means the first step should be normalization, not download.
 
-### Where To Get The Attachment From
+### What I Needed To Normalize First
 
-The rough pattern is:
+In the raw event flow, the attachment list is not always ready to use as-is.
 
-- if the event gives you a bot-hosted attachment URL, fetch it through the bot-authenticated path
-- if the event points to a normal Teams file, use Graph to resolve the file and download it
-- if you only need metadata first, fetch metadata before downloading the full content
+Regular channel files usually arrive as references with a `contentUrl`.
 
-In practice, the fields you usually want to normalize are:
+Inline images and some mobile-app images are trickier. I found it useful to normalize those into the same attachment shape as the regular file references before doing anything else. That kept the rest of the pipeline from caring where the attachment originally came from.
 
-- file name
-- content type
-- size
-- source URL or file reference
+The internal shape I wanted was very small:
 
-That gives the rest of your app one stable attachment shape.
+- `id`
+- `url`
+- `name`
+- `size`
+- `mimetype`
 
-### Download Pseudocode
+Once I had that shape, the rest of the app could treat attachments consistently.
+
+Here is the kind of normalization step that helped:
 
 ```ts
-async function downloadAttachment(attachment) {
-  if (isBotHostedAttachment(attachment)) {
-    return downloadViaBotAuth(attachment.url);
-  }
+async function normalizeTeamsAttachments(message, services) {
+  const { graphClient, botClient } = services;
 
-  const fileRef = await resolveViaGraph(attachment.url);
-  return downloadViaGraph(fileRef);
+  const supportedAttachments = (message.attachments ?? []).filter((attachment) => {
+    const isFileReference = attachment.contentType === "reference";
+    const isBotImage =
+      attachment.contentType === "image/*" &&
+      attachment.contentUrl?.startsWith("https://smba.trafficmanager.net/");
+
+    return isFileReference || isBotImage;
+  });
+
+  return Promise.all(
+    supportedAttachments.map(async (attachment) => {
+      const metadata = attachment.contentUrl.startsWith("https://smba.trafficmanager.net/")
+        ? await botClient.getAttachmentMetadata(attachment.contentUrl)
+        : await graphClient.getAttachmentMetadata(attachment.contentUrl);
+
+      return {
+        id: attachment.id,
+        url: attachment.contentUrl,
+        name: attachment.name,
+        size: metadata.size,
+        mimetype: metadata.mimetype,
+      };
+    })
+  );
 }
 ```
 
-### Upload Pseudocode
+That code shape came from a real constraint: I often wanted file size and content type before I actually downloaded the bytes.
 
-For uploads, I would keep it simple:
+### Metadata Is A Separate Step
 
-1. upload the file into the channel's file storage location
-2. get back the file URL or reference
-3. send a message that includes or points to that file
+This is the part that made the flow much clearer for me.
+
+For Bot Framework media URLs, I used the bot token and made a streamed request just to read the headers. That gave me `content-length` and `content-type` without buffering the whole file.
+
+For Graph-backed files, I first resolved the `contentUrl` into a DriveItem download URL and then read the headers from there.
+
+So the metadata lookup was effectively:
 
 ```ts
-async function sendMessageWithFile(channelRef, file, text) {
-  const uploadedFile = await uploadFileToChannelStorage(channelRef, file);
+async function getAttachmentMetadata(contentUrl) {
+  if (contentUrl.startsWith("https://smba.trafficmanager.net/")) {
+    return getMetadataViaBotToken(contentUrl);
+  }
 
-  return sendBotMessage(channelRef, {
-    text,
-    fileUrl: uploadedFile.webUrl
+  const downloadUrl = await resolveGraphDownloadUrl(contentUrl);
+  return readHeaders(downloadUrl);
+}
+```
+
+The Graph resolution step is the awkward part. The `contentUrl` itself is not always the thing you want to download directly. In my case, the useful pattern was:
+
+- turn the `contentUrl` into a Graph share reference
+- ask Graph for the DriveItem behind it
+- use the returned `@microsoft.graph.downloadUrl`
+
+That is a lot more specific than "download the attachment," but that specificity is what makes Teams integrations stop feeling random.
+
+### Full Download Still Splits In Two
+
+Once metadata is normalized, the full download path becomes straightforward:
+
+- Bot Framework media URL: download with bot auth
+- Graph or SharePoint-backed file: resolve through Graph, then GET the bytes
+
+That left me with a simple download function:
+
+```ts
+async function downloadAttachmentFile(attachment, services) {
+  const { graphClient, botClient } = services;
+
+  const fileBuffer = attachment.url.startsWith("https://smba.trafficmanager.net/")
+    ? await botClient.downloadAttachment(attachment.url)
+    : await graphClient.downloadAttachment(attachment.url);
+
+  return writeTempFile({
+    originalName: attachment.name,
+    bytes: fileBuffer.content,
+    mimetype: fileBuffer.mimetype,
   });
 }
 ```
 
-Inline images need a bit more care. If you store raw image URLs directly in the message body, your downstream search, summarization, and debugging get noisy very quickly.
+In practice I also gave the temp file a generated name so collisions would not overwrite earlier downloads in the same batch.
+
+### Inline Images Pollute The Body Text
+
+One detail I would not skip: Teams message bodies can contain Graph image URLs inline.
+
+If you keep those raw URLs in the stored message text and also store the attachments separately, you end up double-counting the same image. Search gets noisy, summarization gets noisy, and debugging the stored message becomes harder than it should be.
+
+So I found it worth cleaning the body text after the attachment list had already been normalized.
+
+### Uploads Go Through The Channel File Folder
+
+Uploading was clearer once I stopped expecting a single "send attachment" API.
+
+The reliable shape was:
+
+1. ask Graph for the channel's `filesFolder`
+2. upload the bytes into that folder's drive
+3. keep the returned file `id` and `webUrl`
+4. send the bot-authored message that points to the uploaded file
+
+That is roughly:
+
+```ts
+async function uploadFileToChannel(payload) {
+  const { graphClient, teamId, channelId, file } = payload;
+
+  const channelFolder = await graphClient.getChannelFilesFolder({ teamId, channelId });
+  const uploadedFile = await graphClient.putFileContent({
+    driveId: channelFolder.parentReference.driveId,
+    folderName: channelFolder.name,
+    fileName: withRandomPrefix(file.name),
+    bytes: file.bytes,
+  });
+
+  return {
+    id: uploadedFile.id,
+    webUrl: uploadedFile.webUrl,
+  };
+}
+```
+
+The random prefix matters more than it sounds. If you write directly to the folder with the original file name, duplicate names can overwrite each other.
+
+For outbound messages, I prefer to think of file upload and visible message send as two different actions:
+
+- Graph owns file storage
+- the bot owns the conversation message
+
+That keeps the responsibility boundary clean.
 
 ## A Good High-Level Coding Shape
 
