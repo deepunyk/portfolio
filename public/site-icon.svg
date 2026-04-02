@@ -1,18 +1,10 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="18" fill="#162027"/>
-  <circle cx="47" cy="17" r="10" fill="#0F766E"/>
-  <circle cx="18" cy="50" r="8" fill="#F1D8A4" fill-opacity="0.92"/>
+  <rect width="64" height="64" rx="18" fill="#162027" />
   <path
-    d="M21 16V48H30C39 48 45 42 45 32C45 22 39 16 30 16H21Z"
-    stroke="#FFF9EE"
-    stroke-width="6"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M18 14H31C41.138 14 48 21.068 48 32C48 42.932 41.138 50 31 50H18V14ZM26 22V42H30.5C36.11 42 40 37.874 40 32C40 26.126 36.11 22 30.5 22H26Z"
+    fill="#FFF9EE"
   />
-  <path
-    d="M29 21L46 47"
-    stroke="#F1D8A4"
-    stroke-width="5"
-    stroke-linecap="round"
-  />
+  <rect x="18" y="14" width="6" height="36" rx="3" fill="#0F766E" />
 </svg>

@@ -1,6 +1,6 @@
 ---
 title: "Making CloudWatch Logs Actually Queryable"
-description: "We had logs in CloudWatch, but not in a form CloudWatch could really use. This is how I split local and production formatting, preserved structure, and made Sentry point back to the right logs."
+description: "We had logs in CloudWatch, but not in a form CloudWatch could really use. This is the pattern that split local and production formatting, preserved structure, and made Sentry point back to the right logs."
 date: "2025-04-28"
 tags: ["cloudwatch", "logging", "aws", "observability"]
 published: true
@@ -34,7 +34,7 @@ That meant we had logs, but not queryable logs.
 
 ## The Fix Started With Splitting Human Output From Machine Output
 
-The first thing I wanted was a clear separation between local logging and production logging.
+The first useful step was a clear separation between local logging and production logging.
 
 So I pulled the formatting config into shared logger utilities and gave the two environments different behavior:
 
@@ -53,7 +53,7 @@ It also meant the duplicated logger setup in different modules could go away. In
 
 Formatting alone would not have been enough.
 
-The more important change was in the logger service itself. I wanted metadata to survive as metadata, not get flattened into an opaque sentence.
+The more important change was in the logger service itself. Metadata needed to survive as metadata, not get flattened into an opaque sentence.
 
 The logger now does a better job of separating three kinds of information:
 
@@ -113,7 +113,7 @@ The part I liked most in this change was linking Sentry and CloudWatch more dire
 
 When an error is sent to Sentry now, the logger generates a `sentryAlertId` and includes the request context along with the captured event. That same identifier is also present in the log record.
 
-So if a Sentry alert shows up, I can jump to CloudWatch and ask for the matching logs:
+So if a Sentry alert shows up, the matching CloudWatch logs are easy to query:
 
 ```sql
 fields @timestamp, @message, @logStream
@@ -130,16 +130,16 @@ Now the handoff is much cleaner.
 
 There was one more piece here that looks minor in code but helps a lot when debugging: service identification.
 
-In production, we have two different responsibilities running:
+In production, there were two different responsibilities running:
 
-- `app-server` handles API requests
-- `events-handler` processes queued events
+- one service handled API requests
+- another processed queued events
 
-Outside production, the app server handles both roles, so the distinction is less important. But in production, it matters a lot.
+Outside production, one service could handle both roles, so the distinction was less important. But in production, it mattered a lot.
 
 This change makes Sentry's `server_name` reflect the actual service handling the work. That means an issue can be traced back not just to "the backend," but to the side of the backend that actually owned the failure.
 
-I like this kind of detail because it stops debugging from becoming too abstract. When a system has separate request-handling and queue-handling paths, the service boundary should show up in your tooling.
+This kind of detail stops debugging from becoming too abstract. When a system has separate request-handling and queue-handling paths, the service boundary should show up in the tooling.
 
 ## What Changed Day To Day
 
@@ -155,7 +155,7 @@ After this work:
 
 None of that is glamorous, but it is the kind of cleanup that pays back every time something breaks in production.
 
-It also reinforced a simple lesson I keep coming back to: a logging call is not done when the line is printed. It is only done when the destination system can still use that data properly.
+It also reinforced a simple lesson worth keeping explicit: a logging call is not done when the line is printed. It is only done when the destination system can still use that data properly.
 
 ## If I Were Setting This Up From Scratch
 

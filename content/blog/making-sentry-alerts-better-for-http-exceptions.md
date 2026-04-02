@@ -1,12 +1,12 @@
 ---
 title: "Making Sentry Alerts Better For HTTP Exceptions"
-description: "Default Sentry alerts for outbound HTTP failures were too generic to act on quickly. This is the pattern I like: group by method, URL, and status, carry over the useful response body, and scrub the sensitive parts before the event leaves the process."
+description: "Default Sentry alerts for outbound HTTP failures were too generic to act on quickly. This is a pattern that works well: group by method, URL, and status, carry over the useful response body, and scrub the sensitive parts before the event leaves the process."
 date: "2023-02-01"
 tags: ["sentry", "http", "observability", "error-handling"]
 published: true
 ---
 
-One thing I have run into with Sentry is that an alert can be technically correct and still not be very useful.
+One thing that shows up with Sentry is that an alert can be technically correct and still not be very useful.
 
 HTTP client failures are a good example.
 
@@ -14,7 +14,7 @@ If an application throws because an outbound request failed, Sentry will usually
 
 But the grouping is often not shaped around the question you actually want answered.
 
-When I am looking at an HTTP failure, I usually care about some combination of:
+When looking at an HTTP failure, the useful questions are usually some combination of:
 
 - which upstream call failed
 - what method we were using
@@ -29,7 +29,7 @@ In our case the fix was not a new monitoring product or a big wrapper around the
 
 That hook runs right before the event is sent. It is a good place to look at the original exception, recognize that it came from an HTTP client, and reshape the event into something more useful.
 
-The version I like has three jobs:
+The useful version has three jobs:
 
 - fingerprint the event based on the HTTP request and outcome
 - rename the exception so the issue title reads like the failed request
@@ -59,9 +59,9 @@ It also helps when the same endpoint fails in different ways. A 401 usually poin
 
 ## The Issue Title Matters More Than People Think
 
-I also like rewriting the exception type for these events.
+It also helps to rewrite the exception type for these events.
 
-Instead of keeping a generic exception name from the HTTP client, I would rather have the issue title say something closer to:
+Instead of keeping a generic exception name from the HTTP client, it is better when the issue title says something closer to:
 
 `GET /api/accounts 403`
 
@@ -87,11 +87,11 @@ A lot of HTTP failures are not really explained by the stack trace. The real exp
 
 If that body is missing from the event, the alert can feel one step removed from the real problem. You know the request failed, but you still have to go hunting for the actual reason.
 
-So when there is a response object, I like adding the response data into Sentry event extras and, when it makes sense, into the captured exception value as well.
+So when there is a response object, it helps to add the response data into Sentry event extras and, when it makes sense, into the captured exception value as well.
 
 That gets the alert closer to the thing a human actually needs to read.
 
-## The Part I Would Not Skip
+## The Part Worth Not Skipping
 
 If you enrich Sentry events from HTTP exceptions, you also need to think about what else is riding along with that request.
 
@@ -105,7 +105,7 @@ The point of adding more context is to make alerts easier to act on, not to leak
 
 ## A Trimmed Example
 
-This is the shape of the code I like. It uses Axios because that is what we were using in the app, but the pattern is not Axios-specific.
+This is the code shape that works well. It uses Axios because that is what we were using in the app, but the pattern is not Axios-specific.
 
 ```ts
 beforeSend: (event, hint) => {
@@ -161,7 +161,7 @@ It also makes issue grouping calmer. Instead of one big bucket of "HTTP client e
 
 ## Where I Would Keep This Generic
 
-Even though this came out of a real code path in our server, I would keep the pattern itself fairly generic.
+Even though this came out of a real code path in a production server, the pattern itself should stay fairly generic.
 
 It applies anywhere you have all three of these conditions:
 
@@ -193,7 +193,7 @@ That is one of those details worth deciding deliberately. The right grouping key
 
 Response bodies are useful, but they are not automatically safe.
 
-Before attaching them to the event, I would think about:
+Before attaching them to the event, think about:
 
 - whether the payload can include tokens or personal data
 - whether the payload is large enough to make Sentry noisy
@@ -216,7 +216,7 @@ That last check matters more than it sounds. It is very easy to improve grouping
 
 ## The Main Lesson
 
-The thing I like about this pattern is that it treats HTTP exceptions as their own observability shape.
+The useful part of this pattern is that it treats HTTP exceptions as their own observability shape.
 
 They are not just ordinary exceptions that happened to involve the network. They usually carry a request, a response, a status code, and a remote system boundary. If you preserve that shape in Sentry, the alert becomes much more actionable.
 
