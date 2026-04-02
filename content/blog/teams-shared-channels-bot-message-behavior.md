@@ -1,7 +1,7 @@
 ---
 title: "What Shared Channels Actually Change For A Teams Bot"
 description: "The confusing part about shared channels in Teams is that your bot setup can be correct, reads can work, and regular message events can still fail unless the bot is explicitly mentioned."
-date: "2026-04-01"
+date: "2026-01-19"
 tags: ["microsoft-teams", "shared-channels", "microsoft-graph", "bot-framework"]
 published: true
 ---
