@@ -3,7 +3,7 @@ title: "The SQS Long Poll That Never Came Back"
 description: "A debugging story about a poller that looked healthy for years, then started hanging forever when the network dropped at exactly the wrong moment."
 date: "2023-11-17"
 tags: ["aws", "sqs", "long-polling", "debugging"]
-published: false
+published: true
 ---
 
 We hit a bug that was frustrating for a long time partly because nothing looked obviously broken.
