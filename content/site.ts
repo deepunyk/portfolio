@@ -10,9 +10,9 @@ export const profile = {
 
 export const focusAreas = [
   {
-    title: "Ticketing On Top Of Chat",
+    title: "Reliable Systems That Stay Maintainable",
     description:
-      "Building support systems where Slack or Teams can be the front door without the backend turning into a knot.",
+      "I have worked on systems where downtime meant lost customers, so a lot of the job was building them to stay up, stay understandable, and keep working without turning maintenance into a constant fire drill.",
   },
   {
     title: "Integration-Heavy Backend Work",
