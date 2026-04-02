@@ -8,11 +8,11 @@ published: true
 
 Request IDs are useful, but they stop one step short of the questions I usually end up asking in production.
 
-When I am debugging a flow, I rarely want only "which request was this?" I usually want some combination of:
+When debugging a flow, the useful question is rarely only "which request was this?" It is usually some combination of:
 
 - which account this belonged to
 - which customer or collection was involved
-- which story or topic we were processing
+- which workflow or entity we were processing
 - which background flow or queue handler owned the work
 
 Passing those values through every function works, but it gets ugly fast. So like a lot of teams, we wanted a context mechanism that could attach that metadata once and make it available everywhere else automatically.
@@ -33,7 +33,7 @@ Most writing on request context in Node stops at a familiar pattern:
 
 That is a fine starting point, but it was not quite what we needed.
 
-We wanted the logger to pick up business identifiers automatically. Things like `accountId`, `storyId`, `topicId`, `customerId`, and flow-level markers mattered more to our day-to-day debugging than a generic correlation ID on its own.
+We wanted the logger to pick up business identifiers automatically. Things like `accountId`, `customerId`, `entityId`, and flow-level markers mattered more to day-to-day debugging than a generic correlation ID on its own.
 
 The payoff we were after was simple:
 
@@ -79,7 +79,7 @@ Passing IDs through every function is ugly, but replacing that ugliness with hid
 
 The hard part of async context is not writing `set()` and `get()`. It is understanding when data stops being owned.
 
-That was the piece I had underestimated.
+That was the piece that had been underestimated.
 
 If you keep per-async-resource state in a map, you are also taking responsibility for the lifetime of those entries. If cleanup is incomplete or inconsistent, those records can accumulate quietly over time.
 
@@ -91,7 +91,7 @@ Observability abstractions live on hot paths. If they leak, they leak everywhere
 
 ## Reading The Platform More Closely Changed My Mental Model
 
-This was one of the first times I had to go read platform internals and open source code more carefully instead of trusting the nice, simple shape of my own abstraction.
+This was the kind of bug that forces a closer read of platform internals and open source code instead of trusting the nice, simple shape of the abstraction.
 
 The gap was not in our logger API. The gap was in my mental model of async resource lifecycles.
 
@@ -154,9 +154,8 @@ function getContextData() {
   return {
     requestId: executionContext.get("requestId"),
     accountId: executionContext.get("accountId"),
-    storyId: executionContext.get("storyId"),
-    topicId: executionContext.get("topicId"),
     customerId: executionContext.get("customerId"),
+    entityId: executionContext.get("entityId"),
     flowName: executionContext.get("flowName"),
   };
 }
@@ -184,7 +183,7 @@ Another reason I like this pattern is that it works outside HTTP request handlin
 
 Request middleware is the common example, but some of the more useful cases are actually background or event-driven flows.
 
-For example, in one of our consumers, we set `accountId` at the start of handling a message, do the work, and then clear it in a `finally` block. That is a small detail, but it is an important one.
+For example, in one consumer path, the code sets `accountId` at the start of handling a message, does the work, and then clears it in a `finally` block. That is a small detail, but it is an important one.
 
 It makes the flow boundary explicit:
 
@@ -242,11 +241,11 @@ That is the part I would stress most now. A context propagation layer is easy to
 
 ## The Main Lesson
 
-I still like the end result of this pattern a lot.
+The end result of this pattern is still useful.
 
-Having logs and Sentry events automatically carry `accountId`, `storyId`, `customerId`, or `flowName` is genuinely useful. It makes production debugging much closer to the shape of the actual business workflow, and it removes a lot of boring plumbing from application code.
+Having logs and Sentry events automatically carry `accountId`, `entityId`, `customerId`, or `flowName` is genuinely useful. It makes production debugging much closer to the shape of the actual business workflow, and it removes a lot of boring plumbing from application code.
 
-But I trust that abstraction more now because I learned the harder lesson behind it.
+But the abstraction is only trustworthy when the harder lesson behind it is handled explicitly.
 
 Async context propagation is not only about correlation. It is also about lifecycle.
 

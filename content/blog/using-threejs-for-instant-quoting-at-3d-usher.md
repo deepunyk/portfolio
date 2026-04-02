@@ -30,7 +30,7 @@ So the goal was not just to generate a number quickly. The goal was to inspect t
 
 ## Why Three.js Was Part Of The Answer
 
-I used Three.js as the geometry layer for the quoting flow.
+Three.js ended up being the geometry layer for the quoting flow.
 
 Users would upload 3D files, and the system needed to do more than just display them in a browser. It needed to inspect the model and extract signals that were useful for pricing. A free online viewer was already valuable on its own because many customers did not want to open paid CAD software just to inspect a file. But for quoting, the viewer also became part of the analysis pipeline.
 
@@ -43,15 +43,15 @@ At a high level, the flow looked like this:
 5. the quotation layer combined geometry-driven signals with pricing rules
 6. the system returned a quote immediately instead of pushing everything into manual review
 
-Three.js helped because it gave me a way to work directly with the model rather than treating the file as an opaque upload.
+Three.js helped because it made it possible to work directly with the model rather than treating the file as an opaque upload.
 
 ## The Other Half Was The Pricing Engine
 
 The 3D side was only half the job.
 
-I was also given a large Excel-based pricing model that captured how quotes changed across different parameters. Material changed the number. Quantity changed it. Shipping changed it. Manufacturing process changed it. Geometry changed it too, though that part was harder because it had to be inferred from the model rather than selected from a dropdown.
+There was also a large spreadsheet-based pricing model that captured how quotes changed across different parameters. Material changed the number. Quantity changed it. Shipping changed it. Manufacturing process changed it. Geometry changed it too, though that part was harder because it had to be inferred from the model rather than selected from a dropdown.
 
-So I ended up building two connected layers:
+So the system ended up with two connected layers:
 
 - a Three.js-based analysis layer to understand the part
 - a quotation layer to translate that understanding into pricing
@@ -60,13 +60,13 @@ That split mattered. If everything lived in one pile of logic, it would have bee
 
 ## The Hard Part Was Not Just Coding
 
-The most interesting part of the project for me was that the challenge was not purely technical.
+The most interesting part of the project was that the challenge was not purely technical.
 
-My background was in computer science, but this problem sat deep inside a mechanical domain. Before I could write useful code, I had to understand why certain shapes were difficult, why some features increased cost, and why two models with roughly similar outer dimensions could have very different manufacturing implications.
+My background was in computer science, but this problem sat deep inside a mechanical domain. Before the code could be useful, the domain work had to be clear: why certain shapes were difficult, why some features increased cost, and why two models with roughly similar outer dimensions could have very different manufacturing implications.
 
-That part took real effort. I had to slow down and learn the manufacturing logic before touching implementation in a serious way.
+That part took real effort. The manufacturing logic had to be understood before implementation could become useful.
 
-I could not treat the geometry layer as a visual problem only. I had to understand what the geometry meant.
+The geometry layer could not be treated as a visual problem only. The hard part was understanding what the geometry meant.
 
 That changed the way I approached the work:
 
@@ -78,7 +78,7 @@ That was probably the biggest lesson from the whole project. In domain-heavy sof
 
 ## What Made The Product Useful
 
-What I liked about this work was that it connected technical depth to a very practical user problem.
+What made this work satisfying was that it connected technical depth to a very practical user problem.
 
 Manual quoting in manufacturing is slow for obvious reasons. Files move around, vendors review them, people compare options, and a customer can lose days just waiting for somebody to inspect a part. 3D Usher wanted to compress that into a much faster flow. Internally, the framing was basically moving from a long quoting cycle to a few guided steps.
 
@@ -86,7 +86,7 @@ But speed alone would not have been enough. The more important part was building
 
 If a customer uploads a model with hidden complexity, chooses injection molding or vacuum casting or 3D printing, and gets a number immediately, that number needs to reflect more than a thumbnail understanding of the part. That is what made the problem worth solving.
 
-The personalized dashboard and tracking experience around the product mattered too, but the core technical challenge for me was making the model analysis and quotation logic feel grounded in the real manufacturing workflow.
+The surrounding dashboard and tracking experience mattered too, but the core technical challenge was making the model analysis and quotation logic feel grounded in the real manufacturing workflow.
 
 ## What I Took Away From It
 

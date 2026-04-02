@@ -18,9 +18,9 @@ At first we treated it like a one-off. Later it was clear something was seriousl
 
 ## Why It Was So Confusing
 
-The part that misled me early was the mental model I had for SQS long polling.
+The misleading part early on was the mental model around SQS long polling.
 
-I assumed `WaitTimeSeconds` would also behave like a timeout for the request itself. If the poll was configured for 10 seconds, I expected the whole thing to return or fail within something close to that window.
+The assumption was that `WaitTimeSeconds` would also behave like a timeout for the request itself. If the poll was configured for 10 seconds, it seemed reasonable to expect the whole thing to return or fail within something close to that window.
 
 That is not what it does.
 
@@ -28,7 +28,7 @@ That is not what it does.
 
 So if the request reaches the server and the connection gets into a bad state after that, you can end up in a much stranger place: the long poll does not finish, but it also does not error in the way your application expects.
 
-I went through the AWS JavaScript SDK code looking for a default timeout on the `ReceiveMessage` request and could not find anything that gave me confidence this path was protected by default. That was the point where the bug stopped looking like "we probably missed an exception" and started looking like a transport-level edge we had never tested properly.
+Reading through the AWS JavaScript SDK code for a default timeout on the `ReceiveMessage` request did not give much confidence that this path was protected by default. That was the point where the bug stopped looking like "we probably missed an exception" and started looking like a transport-level edge the system had never tested properly.
 
 ## The Symptom In Production
 
@@ -42,7 +42,7 @@ So the first fix we shipped was a practical one, not a satisfying one.
 
 If a long poll took more than 20 seconds, even though the configured SQS wait was 10 seconds, we treated that as suspicious and restarted the poller loop. In code, the idea was basically a `Promise.race` around the poll request with a 20-second watchdog.
 
-That stabilized things for us, but it did not explain the bug. It just kept the service from sitting there forever.
+That stabilized the service, but it did not explain the bug. It just kept the worker from sitting there forever.
 
 ## How We Finally Reproduced It
 
@@ -99,7 +99,7 @@ If you have a service doing SQS long polling, I would test this path on purpose:
 5. add an explicit client-side timeout if the behavior is ambiguous
 6. add a second watchdog at the poller-loop level so one stuck request cannot silently kill the worker
 
-The part I liked most about this bug, once the frustration wore off, was the path to understanding it.
+The most satisfying part of this bug, once the frustration wore off, was the path to understanding it.
 
 There was no neat article sitting on the internet with the exact answer we needed. We had to build the reproduction ourselves, challenge a bad assumption about `WaitTimeSeconds`, and force the system into the exact broken state.
 
