@@ -1,33 +1,33 @@
 export const profile = {
   name: "Deepak Nayak",
-  role: "Lead Engineer at ClearFeed",
+  role: "Lead engineer at ClearFeed",
   location: "Bengaluru, India",
   email: "deepaknayakp@outlook.com",
   linkedin: "https://www.linkedin.com/in/deepak-nayak-in",
   summary:
-    "I was the first engineer at ClearFeed, and that still describes the kind of work I enjoy most. Start with a fuzzy product problem, build the backend and integrations that make it real, then stay with it long enough to make it reliable for the people using it every day.",
+    "I was the first engineer at ClearFeed, and that still feels like the kind of work I understand best. Start with something half-formed, figure out where the system boundaries should live, build the backend and integrations, then stay with it long enough to make the rough edges boring.",
 };
 
 export const focusAreas = [
   {
-    title: "Reliable Systems That Stay Maintainable",
+    title: "Systems That Sit Between Too Many Tools",
     description:
-      "I have worked on systems where downtime meant lost customers, so a lot of the job was building them to stay up, stay understandable, and keep working without turning maintenance into a constant fire drill.",
+      "A lot of my work has been in the middle: Slack, Teams, CRMs, ticketing systems, queues, and whatever each API happens to get wrong in its own way.",
   },
   {
-    title: "Integration-Heavy Backend Work",
+    title: "Backend Work With Awkward Edges",
     description:
-      "The kind of work where events, retries, SLAs, analytics, and awkward API edges all matter at the same time.",
+      "Retries, sync drift, background jobs, rate limits, attachment handling, partial failures. The sort of work that is noisy under the hood and should feel uneventful to everyone else.",
   },
   {
-    title: "AI That Can Actually Help",
+    title: "AI Features With Clear Boundaries",
     description:
-      "Using AI for classification, replies, and tool-driven actions with clear boundaries, not just text generation for its own sake.",
+      "I like AI features more when the surrounding system is well defined: what the model is allowed to do, what gets checked, what falls back to humans, and how the rest of the product stays predictable.",
   },
   {
-    title: "Growing Strong Engineers",
+    title: "Teams That Get Better Together",
     description:
-      "Helping engineers get comfortable with ambiguous backend problems and eventually own the hard parts themselves.",
+      "The part I enjoy more now is helping engineers get comfortable with ambiguous backend work, ask sharper questions early, and take ownership of the hard bits without drama.",
   },
 ];
 
@@ -48,21 +48,21 @@ export const timeline = [
   },
   {
     company: "JaanSay",
-    title: "Full Stack Developer",
+    title: "Contract Full Stack Developer",
     period: "Aug 2020 - Jul 2021",
     detail:
       "Part of a two-person tech team building a hyperlocal platform from scratch with Flutter, Node.js, Nginx, and a tiny DigitalOcean budget. We handled product work, deployment, scaling, and customer onboarding ourselves, so every technical decision had to be simple and cheap enough to live with.",
   },
   {
     company: "3D Usher",
-    title: "Full Stack Developer",
+    title: "Contract Full Stack Developer",
     period: "Dec 2020 - Feb 2021",
     detail:
       "Built a geometry-aware instant quoting system for 3D manufacturing instead of the usual bounding-box shortcuts. I had to learn enough about materials, manufacturing constraints, and pricing logic to make the Three.js interface and quoting flow produce numbers customers could actually trust.",
   },
   {
     company: "Dreamsoft Innovations",
-    title: "Full Stack Developer",
+    title: "Software Engineer Intern",
     period: "Apr 2020 - Oct 2020",
     detail:
       "My first serious production work. I built the Flutter side of a kids' digital library app, handled responsive UI across devices, and wired Flutter into a Unity-based story engine so the app experience and backend stayed in sync.",
@@ -70,10 +70,10 @@ export const timeline = [
 ];
 
 export const whatDrivesMe = [
-  "When a messy product problem finally turns into a system boundary I can work with.",
-  "Backend and integration work that is noisy under the hood but uneventful for the people using it.",
-  "Building from scratch, then staying with it long enough to smooth out the parts people would otherwise work around.",
-  "Problems that sit somewhere between product decisions, operational reality, and engineering detail.",
+  "When a half-formed product idea finally has boundaries I can work with.",
+  "Backend work that looks simple from the outside because the messy bits got handled properly.",
+  "Building from scratch, then sticking around long enough to remove the workarounds.",
+  "Problems that sit somewhere between product decisions, data flow, and operations.",
   "Watching an engineer go from unsure to confidently owning a difficult part of the system.",
-  "Teams that care about craft, say the hard thing early, and do not get too precious about their own ideas.",
+  "Teams that say the hard thing early and do not get too attached to their first idea.",
 ];

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { focusAreas, profile, timeline } from "@/content/site";
+import { focusAreas, profile, timeline, whatDrivesMe } from "@/content/site";
 import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
 export default function Home() {
@@ -40,25 +40,31 @@ export default function Home() {
               {profile.role}
             </p>
             <h1 className="max-w-3xl text-4xl leading-tight md:text-6xl">
-              I like taking fuzzy product problems and turning them into systems people can rely on.
+              I like building products that sit in the middle of too many systems.
             </h1>
             <p className="max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
               {profile.summary}
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
-              <a
-                href={profile.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/blog"
                 className="rounded-full bg-[var(--foreground)] px-5 py-2.5 text-sm font-medium text-[var(--surface)] hover:bg-[#26323c]"
               >
-                LinkedIn
-              </a>
+                Read the blog
+              </Link>
               <a
                 href={`mailto:${profile.email}`}
                 className="rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-medium hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
                 Email Me
+              </a>
+              <a
+                href={profile.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-2 text-sm text-[var(--muted)] underline-offset-4 hover:text-[var(--accent)] hover:underline"
+              >
+                LinkedIn
               </a>
             </div>
           </div>
@@ -77,8 +83,9 @@ export default function Home() {
                 Based in {profile.location}
               </p>
               <p className="mt-1 text-sm leading-6 text-[var(--foreground)]">
-                I like backend work with awkward edges, system boundaries that
-                need care, and products people end up depending on every day.
+                Most of the work I enjoy is not especially glamorous. It is
+                usually state, sync, retries, and making awkward edges behave
+                well.
               </p>
             </div>
           </div>
@@ -88,9 +95,9 @@ export default function Home() {
           <div className="space-y-3">
             <h2 className="text-3xl md:text-4xl">The Work I Keep Getting Pulled Toward</h2>
             <p className="max-w-2xl text-[var(--muted)]">
-              Usually it is a product sitting in the middle of too many systems,
-              some operational mess no one wants to think about, and a team
-              trying to move quickly without making the whole thing fragile.
+              Usually it is a product in the middle of too many systems, some
+              background job or sync path behaving strangely, and a team trying
+              to clean it up without slowing down everything else.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -98,6 +105,23 @@ export default function Home() {
               <article key={area.title} className="surface rounded-2xl p-6">
                 <h3 className="text-2xl">{area.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{area.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="reveal space-y-6">
+          <div className="space-y-3">
+            <h2 className="text-3xl md:text-4xl">A Few Things I Keep Coming Back To</h2>
+            <p className="max-w-2xl text-[var(--muted)]">
+              Not strengths, exactly. More the parts of engineering that still
+              hold my attention after the novelty wears off.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {whatDrivesMe.map((item) => (
+              <article key={item} className="surface rounded-2xl p-6">
+                <p className="text-sm leading-7 text-[var(--muted)]">{item}</p>
               </article>
             ))}
           </div>
@@ -131,8 +155,8 @@ export default function Home() {
             <div className="space-y-2">
               <h2 className="text-3xl md:text-4xl">Latest Writing</h2>
               <p className="text-sm text-[var(--muted)]">
-                Notes on backend engineering, AI workflows, product building,
-                and the parts of the job I keep coming back to.
+                Mostly backend notes, integration failures, production oddities,
+                and the occasional build log from trying something new.
               </p>
             </div>
             <Link href="/blog" className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-strong)]">
@@ -176,16 +200,15 @@ export default function Home() {
         </section>
 
         <section className="reveal surface-strong rounded-3xl p-8 text-center md:p-10">
-          <p className="text-sm tracking-[0.18em] text-[var(--muted)] uppercase">
-            Say Hello
-          </p>
+          <p className="text-sm tracking-[0.18em] text-[var(--muted)] uppercase">Contact</p>
           <h2 className="mt-3 text-3xl md:text-4xl">
-            If you are building something thoughtful, I would love to hear about it.
+            If your team is working through messy integrations, background jobs,
+            or AI features with real system boundaries, feel free to email me.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-            I am based in {profile.location}. I like difficult engineering
-            problems, small teams with trust, and products that become part of
-            someone&apos;s daily work.
+            I am based in {profile.location}. I usually enjoy the work that
+            starts a little unclear and gets better once the boundaries,
+            failure modes, and ownership are made explicit.
           </p>
           <a
             href={`mailto:${profile.email}`}
