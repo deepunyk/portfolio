@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: "%s | Deepak Nayak",
   },
   description:
-    "Lead engineer portfolio: backend systems, AI workflows, and practical writing on building support infrastructure.",
+    "Portfolio of Deepak Nayak: backend systems, product-minded engineering, and writing about the awkward edges that show up in real software.",
   icons: {
     icon: [{ url: "/site-icon.svg", type: "image/svg+xml" }],
     shortcut: "/site-icon.svg",

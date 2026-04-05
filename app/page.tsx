@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { focusAreas, profile, timeline, whatDrivesMe } from "@/content/site";
+import {
+  focusAreas,
+  profile,
+  timeline,
+  workModes,
+} from "@/content/site";
 import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
 export default function Home() {
@@ -39,12 +44,12 @@ export default function Home() {
             <p className="inline-flex rounded-full border border-[var(--border)] bg-[var(--highlight)] px-3 py-1 text-xs font-medium tracking-wide text-[var(--accent)] uppercase">
               {profile.role}
             </p>
-            <h1 className="max-w-3xl text-4xl leading-tight md:text-6xl">
-              I like building products that sit in the middle of too many systems.
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
+            <h1 className="max-w-3xl text-[2.4rem] leading-tight md:text-[3.5rem]">
               {profile.summary}
-            </p>
+            </h1>
+            <div className="max-w-2xl space-y-4 text-lg leading-relaxed text-[var(--muted)]">
+              <p>{profile.detail}</p>
+            </div>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href="/blog"
@@ -56,7 +61,7 @@ export default function Home() {
                 href={`mailto:${profile.email}`}
                 className="rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-medium hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
-                Email Me
+                Email me
               </a>
               <a
                 href={profile.linkedin}
@@ -82,22 +87,17 @@ export default function Home() {
               <p className="text-[11px] font-medium tracking-[0.18em] text-[var(--muted)] uppercase">
                 Based in {profile.location}
               </p>
-              <p className="mt-1 text-sm leading-6 text-[var(--foreground)]">
-                Most of the work I enjoy is not especially glamorous. It is
-                usually state, sync, retries, and making awkward edges behave
-                well.
-              </p>
             </div>
           </div>
         </section>
 
-        <section id="work" className="reveal space-y-6">
+        <section id="work" className="reveal space-y-6 pt-8">
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl">The Work I Keep Getting Pulled Toward</h2>
+            <h2 className="text-3xl md:text-4xl">The kind of work I do best</h2>
             <p className="max-w-2xl text-[var(--muted)]">
-              Usually it is a product in the middle of too many systems, some
-              background job or sync path behaving strangely, and a team trying
-              to clean it up without slowing down everything else.
+              Most of it sits somewhere between product decisions, backend
+              systems, and the operational details that start to matter once
+              people depend on the product every day.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -112,23 +112,24 @@ export default function Home() {
 
         <section className="reveal space-y-6">
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl">A Few Things I Keep Coming Back To</h2>
+            <h2 className="text-3xl md:text-4xl">How I work</h2>
             <p className="max-w-2xl text-[var(--muted)]">
-              Not strengths, exactly. More the parts of engineering that still
-              hold my attention after the novelty wears off.
+              I can work across the whole product when needed, go deep on a
+              specific engineering problem, or lead a team through the work.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {whatDrivesMe.map((item) => (
-              <article key={item} className="surface rounded-2xl p-6">
-                <p className="text-sm leading-7 text-[var(--muted)]">{item}</p>
+          <div className="grid gap-4 md:grid-cols-3">
+            {workModes.map((mode) => (
+              <article key={mode.title} className="surface rounded-2xl p-6">
+                <h3 className="text-2xl">{mode.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{mode.description}</p>
               </article>
             ))}
           </div>
         </section>
 
         <section className="reveal space-y-6" id="about">
-          <h2 className="text-3xl md:text-4xl">A Few Stops Along The Way</h2>
+          <h2 className="text-3xl md:text-4xl">A few stops along the way</h2>
           <div className="space-y-4">
             {timeline.map((entry) => (
               <article
@@ -153,19 +154,22 @@ export default function Home() {
         <section id="writing" className="reveal space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
-              <h2 className="text-3xl md:text-4xl">Latest Writing</h2>
+              <h2 className="text-3xl md:text-4xl">Latest writing</h2>
               <p className="text-sm text-[var(--muted)]">
-                Mostly backend notes, integration failures, production oddities,
-                and the occasional build log from trying something new.
+                Notes from backend work, integration problems, production issues,
+                and things that only became clear after shipping.
               </p>
             </div>
-            <Link href="/blog" className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-strong)]">
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-strong)]"
+            >
               See all posts
             </Link>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            {latestPosts.map((post) => (
+            {latestPosts.map((post) =>
               post.externalUrl ? (
                 <a
                   key={post.slug}
@@ -194,27 +198,27 @@ export default function Home() {
                   <h3 className="mt-3 text-2xl group-hover:text-[var(--accent)]">{post.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.description}</p>
                 </Link>
-              )
-            ))}
+              ),
+            )}
           </div>
         </section>
 
         <section className="reveal surface-strong rounded-3xl p-8 text-center md:p-10">
           <p className="text-sm tracking-[0.18em] text-[var(--muted)] uppercase">Contact</p>
           <h2 className="mt-3 text-3xl md:text-4xl">
-            If your team is working through messy integrations, background jobs,
-            or AI features with real system boundaries, feel free to email me.
+            If your team is working through integrations, backend systems, or
+            product foundations that need to be stronger, feel free to email me.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-            I am based in {profile.location}. I usually enjoy the work that
-            starts a little unclear and gets better once the boundaries,
-            failure modes, and ownership are made explicit.
+            I am based in {profile.location}. I enjoy work where the problem is
+            real, the system still needs structure, and the solution has to hold
+            up in production.
           </p>
           <a
             href={`mailto:${profile.email}`}
             className="mt-6 inline-flex rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent-strong)]"
           >
-            Reach Out
+            Reach out
           </a>
         </section>
       </main>
