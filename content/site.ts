@@ -1,33 +1,55 @@
 export const profile = {
   name: "Deepak Nayak",
-  role: "Lead engineer at ClearFeed",
+  role: "Backend engineer, product builder, team lead",
   location: "Bengaluru, India",
   email: "deepaknayakp@outlook.com",
   linkedin: "https://www.linkedin.com/in/deepak-nayak-in",
   summary:
-    "I was the first engineer at ClearFeed, and that still feels like the kind of work I understand best. Start with something half-formed, figure out where the system boundaries should live, build the backend and integrations, then stay with it long enough to make the rough edges boring.",
+    "I like building products that solve a real problem and become hard to replace.",
+  detail:
+    "Most of my work is backend: integrations, sync paths, queues, retries, and the parts of a system that need to stay reliable. But I care just as much about whether the product is easy to use. If people cannot solve their problem cleanly, the backend work is not enough.",
+  note:
+    "I can build end to end when needed: talk to customers, understand the problem, design the system, write the code, test it, ship it, and see what changed after release.",
 };
 
 export const focusAreas = [
   {
-    title: "Systems That Sit Between Too Many Tools",
+    title: "Products People Settle Into",
     description:
-      "A lot of my work has been in the middle: Slack, Teams, CRMs, ticketing systems, queues, and whatever each API happens to get wrong in its own way.",
+      "I like products that become part of the job instead of a thing people tolerate. The work is not just to ship features. It is to make the product useful enough, reliable enough, and clear enough that people keep leaning on it.",
   },
   {
-    title: "Backend Work With Awkward Edges",
+    title: "Backend Work With Product Consequences",
     description:
-      "Retries, sync drift, background jobs, rate limits, attachment handling, partial failures. The sort of work that is noisy under the hood and should feel uneventful to everyone else.",
+      "Most of the interesting problems for me are deep in the backend, but they always show up in the product eventually. Bad sync, slow jobs, unclear state, or brittle integrations always leak outward. I like fixing those at the root.",
   },
   {
-    title: "AI Features With Clear Boundaries",
+    title: "Systems That Need Shape",
     description:
-      "I like AI features more when the surrounding system is well defined: what the model is allowed to do, what gets checked, what falls back to humans, and how the rest of the product stays predictable.",
+      "I tend to get pulled toward situations where the problem is still fuzzy, the boundaries are not clear yet, and several parts of the system are involved. That is usually where I do my best work.",
   },
   {
-    title: "Teams That Get Better Together",
+    title: "Teams That Need Hands-On Leadership",
     description:
-      "The part I enjoy more now is helping engineers get comfortable with ambiguous backend work, ask sharper questions early, and take ownership of the hard bits without drama.",
+      "Sometimes the right move is to go heads down on a hard problem. Sometimes it is to lead, set direction, make tradeoffs visible, and help the team move with more confidence. I like being useful in either mode.",
+  },
+];
+
+export const workModes = [
+  {
+    title: "I can take a product from a vague problem to a shipped system.",
+    description:
+      "That usually means talking to customers, understanding what is actually painful, figuring out the system boundaries, building the backend and product flow, then staying close enough to learn what changed after release.",
+  },
+  {
+    title: "I can go very deep on one stubborn engineering problem.",
+    description:
+      "Some work needs broad ownership. Some work needs patience. I am comfortable staying with one difficult issue long enough to understand the failure modes, simplify the design, and make it reliable again.",
+  },
+  {
+    title: "I can lead without drifting too far from the work.",
+    description:
+      "I like leading teams in a hands-on way: reviewing designs, unblocking difficult decisions, helping engineers get sharper around ambiguous backend work, and stepping in directly when the problem needs it.",
   },
 ];
 
@@ -37,14 +59,14 @@ export const timeline = [
     title: "Lead Engineer",
     period: "Mar 2024 - Present",
     detail:
-      "I lead backend engineering here now. A lot of the work is still close to the metal: shaping agent workflows, reviewing tricky integration designs, improving internal engineering flow, and helping teammates turn messy requirements into systems we can ship and trust.",
+      "I lead backend engineering here now. The work stays close to the system: shaping product and integration flows, reviewing difficult designs, improving engineering habits, and helping the team turn unclear requirements into something we can trust in production.",
   },
   {
     company: "ClearFeed",
     title: "Founding Engineer",
     period: "Aug 2021 - Mar 2024",
     detail:
-      "I joined as the first engineer and built the backend from scratch: ticketing on top of Slack and Teams, real-time sync with tools like Zendesk, Jira, and Salesforce, event pipelines for analytics and SLAs, and early AI helpers that could classify, respond, create tickets, and trigger actions across other systems.",
+      "I joined as the first engineer and built the backend from scratch. Ticketing on top of Slack and Teams, sync with tools like Zendesk, Jira, and Salesforce, event pipelines for analytics and SLAs, and early automation features that could classify requests, draft responses, create tickets, and trigger actions across other systems.",
   },
   {
     company: "JaanSay",
@@ -67,13 +89,4 @@ export const timeline = [
     detail:
       "My first serious production work. I built the Flutter side of a kids' digital library app, handled responsive UI across devices, and wired Flutter into a Unity-based story engine so the app experience and backend stayed in sync.",
   },
-];
-
-export const whatDrivesMe = [
-  "When a half-formed product idea finally has boundaries I can work with.",
-  "Backend work that looks simple from the outside because the messy bits got handled properly.",
-  "Building from scratch, then sticking around long enough to remove the workarounds.",
-  "Problems that sit somewhere between product decisions, data flow, and operations.",
-  "Watching an engineer go from unsure to confidently owning a difficult part of the system.",
-  "Teams that say the hard thing early and do not get too attached to their first idea.",
 ];
