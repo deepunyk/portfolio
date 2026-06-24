@@ -1,7 +1,7 @@
 ---
 title: "When The Scheduler Can Fire Twice: Claiming Scheduled Work With One UPDATE … RETURNING"
 description: "When a scheduled job can be invoked more than once at the same time, the reliable fix is not a distributed lock. It is one UPDATE … RETURNING that claims a row by flipping its status, plus a lease that recovers work if a run stalls."
-date: "2026-06-24"
+date: "2026-04-19"
 tags: ["cron", "distributed-systems", "leaderless-coordination", "backend", "reliability"]
 published: true
 ---
