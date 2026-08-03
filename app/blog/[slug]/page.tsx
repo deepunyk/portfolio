@@ -42,11 +42,7 @@ const markdownComponents: Components = {
   },
   code: ({ children, className }) => {
     if (className) {
-      return (
-        <code className={`${className} rounded-md bg-[#20262d] px-1.5 py-1 text-[#f2f5f7]`}>
-          {children}
-        </code>
-      );
+      return <code className={className}>{children}</code>;
     }
     return <code className="rounded bg-[#f4ecdf] px-1.5 py-0.5 text-sm">{children}</code>;
   },
