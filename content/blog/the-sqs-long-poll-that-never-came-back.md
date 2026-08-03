@@ -6,49 +6,25 @@ tags: ["aws", "sqs", "long-polling", "debugging"]
 published: true
 ---
 
-We hit a bug that was frustrating for a long time partly because nothing looked obviously broken.
+We had a poller service reading events from an SQS queue using long polling: call `ReceiveMessage`, wait up to 10 seconds, process whatever came back, poll again. Nothing exotic. It had run fine for more than two years.
 
-We had a poller service reading events from an SQS queue using long polling. The shape was simple: call `ReceiveMessage`, wait up to 10 seconds, process whatever came back, then poll again.
+Then sometime around November 2023, one of these pollers would occasionally just stop. No crash, no useful error, no stack trace to chase. It would poll, and then it simply wouldn't poll again. We treated it as a one-off the first couple of times. It kept happening, and it almost never happened while we were watching, which made it worse than a normal bug — there was nothing to look at.
 
-That had been running fine for more than two years.
+## Why it was so confusing
 
-Then sometime around November 2023, a strange thing started happening. Very occasionally, one of these pollers would just stop polling. No clear crash. No useful error. It would simply stall.
+Part of the problem was a wrong assumption baked into how we thought about `WaitTimeSeconds`. It seemed reasonable to expect that a poll configured for 10 seconds would return, one way or another, somewhere close to that window. `WaitTimeSeconds` only controls how long SQS itself waits before responding when the queue is empty. It says nothing about the client connection.
 
-At first we treated it like a one-off. Later it was clear something was seriously wrong, but the bug still felt slippery because it almost never showed up when we were looking at it directly.
+So if the request reaches SQS and the connection goes bad after that point, you land somewhere stranger than a normal timeout: the poll doesn't finish, and it doesn't fail in any way the application is prepared to handle either. We went looking through the AWS JavaScript SDK for a default timeout on `ReceiveMessage` and didn't find much reassurance that this path was covered. That's roughly where the bug stopped feeling like a missed exception and started feeling like a transport edge nobody had ever exercised.
 
-## Why It Was So Confusing
+## The symptom in production
 
-The misleading part early on was the mental model around SQS long polling.
+The service was event-driven end to end through this poller, so when it stalled, the rest of the pipeline went quiet with it — slowly, not with an alarm. Nothing in the loop forced recovery; the process was just sitting there, alive, doing nothing.
 
-The assumption was that `WaitTimeSeconds` would also behave like a timeout for the request itself. If the poll was configured for 10 seconds, it seemed reasonable to expect the whole thing to return or fail within something close to that window.
+The first fix we shipped was practical rather than satisfying. If a poll ran past 20 seconds — double the configured SQS wait — we treated that as suspicious and restarted the loop, a `Promise.race` around the request with a 20-second watchdog. It stopped the pager. It explained nothing.
 
-That is not what it does.
+## How we finally reproduced it
 
-`WaitTimeSeconds` controls how long SQS can wait before responding when there are no messages. It is not a client-side network timeout.
-
-So if the request reaches the server and the connection gets into a bad state after that, you can end up in a much stranger place: the long poll does not finish, but it also does not error in the way your application expects.
-
-Reading through the AWS JavaScript SDK code for a default timeout on the `ReceiveMessage` request did not give much confidence that this path was protected by default. That was the point where the bug stopped looking like "we probably missed an exception" and started looking like a transport-level edge the system had never tested properly.
-
-## The Symptom In Production
-
-In our case, the service was event-driven through this poller. If the poller stopped, the rest of the system slowly went quiet.
-
-The hardest part was that the code path did not look obviously unsafe. We had not really planned for "the request has already reached SQS, but the client loses connectivity in the middle and never comes back."
-
-That gap mattered because nothing in that loop forced the process to recover.
-
-So the first fix we shipped was a practical one, not a satisfying one.
-
-If a long poll took more than 20 seconds, even though the configured SQS wait was 10 seconds, we treated that as suspicious and restarted the poller loop. In code, the idea was basically a `Promise.race` around the poll request with a 20-second watchdog.
-
-That stabilized the service, but it did not explain the bug. It just kept the worker from sitting there forever.
-
-## How We Finally Reproduced It
-
-The breakthrough came when we stopped trying to reason about production symptoms and forced the exact failure locally.
-
-This was the replication flow that finally worked:
+We stopped trying to infer the failure from production symptoms and instead tried to force it locally. The sequence that worked:
 
 1. boot the app server locally
 2. start polling a test or staging SQS queue
@@ -56,51 +32,25 @@ This was the replication flow that finally worked:
 4. disconnect the internet after the request has already gone out
 5. watch whether the poller throws or just hangs
 
-That last detail was the whole trick.
+Timing mattered more than anything else here. Disconnecting before the request left the machine did nothing interesting — the SDK just retried or errored normally. The case that mattered was cutting the connection after the request had already reached the server. Once we got that timing right, the stall reproduced on demand, and after a lot of guessing, having something we could trigger at will felt like real progress.
 
-Disconnecting before the request was sent was not the same thing. The interesting case was disconnecting after the request had already hit the server.
+## What was actually going wrong
 
-Once we tested that exact timing, we could reproduce the stall.
+The application relied on long polling with no explicit client-side timeout of its own, on the assumption that `WaitTimeSeconds` covered that job. It doesn't — it only tells SQS how long to wait for messages before responding. When connectivity dropped after the request had already landed server-side, the client had nothing telling it to give up, so it just hung. From the application's side, the poll was still "in progress." From everyone else's side, the worker was dead.
 
-That was a very satisfying moment, mostly because the bug had felt half imaginary up to then. We knew services were randomly stopping their polls, but we did not have a clean story for why. After enough dead ends, getting a local reproduction felt like finally grabbing something solid.
+We had decent coverage for the failure modes we'd thought of — connection refused, DNS failure, malformed response. We had nothing for a request that's already in flight when the network dies underneath it, and that was the one that actually happened in production.
 
-## What Was Actually Going Wrong
+The watchdog we'd shipped as a stopgap turned out to be a reasonable permanent answer too, not because it was elegant, but because long polling is still network I/O, and network I/O without an explicit timeout will eventually find the one connection state you didn't plan for.
 
-The useful conclusion was narrower than "SQS long polling is broken."
+## If you want to try this yourself
 
-The real issue was this:
-
-- the application was relying on long polling without an explicit client-side timeout
-- `WaitTimeSeconds` was only telling SQS how long to wait for messages
-- when connectivity dropped after the request had already reached the server, the client could hang indefinitely instead of failing fast
-
-That combination is what made the bug so awkward.
-
-From the application's point of view, the poll was still in progress. From the system's point of view, the worker was effectively dead.
-
-## What I Learned
-
-The first lesson was very simple: long polling is still network I/O, and network I/O needs an explicit timeout if you want a reliable service boundary.
-
-The second lesson was about testing.
-
-We had good coverage for obvious failure modes. We did not have a test for "the request is already in flight, and the connection breaks mid-poll." That turned out to be the failure mode that mattered.
-
-The third lesson was that a watchdog can be a perfectly reasonable production fix even before you fully understand the underlying transport behavior. I do not love shipping band-aids as the final answer, but in this case the watchdog bought us safety while we kept digging.
-
-## If You Want To Try This Yourself
-
-If you have a service doing SQS long polling, I would test this path on purpose:
+If you have a service doing SQS long polling, worth testing on purpose:
 
 1. start a real long poll against a disposable queue
 2. wait until the request is already in flight
 3. cut the network
 4. see whether your process errors, retries, or hangs
 5. add an explicit client-side timeout if the behavior is ambiguous
-6. add a second watchdog at the poller-loop level so one stuck request cannot silently kill the worker
+6. add a watchdog at the poller-loop level so one stuck request can't silently take the worker down
 
-The most satisfying part of this bug, once the frustration wore off, was the path to understanding it.
-
-There was no neat article sitting on the internet with the exact answer we needed. We had to build the reproduction ourselves, challenge a bad assumption about `WaitTimeSeconds`, and force the system into the exact broken state.
-
-That is the kind of debugging work I still enjoy. Not because it is pleasant while you are in it, but because once you finally see the shape clearly, the system feels much more honest than it did before.
+There was no article anywhere with this exact answer in it. We had to build the reproduction ourselves and sit with a wrong assumption about `WaitTimeSeconds` long enough to notice it was wrong.

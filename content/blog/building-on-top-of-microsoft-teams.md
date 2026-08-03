@@ -6,71 +6,43 @@ tags: ["microsoft-teams", "bot-framework", "microsoft-graph", "integrations"]
 published: true
 ---
 
-The first instinct with Microsoft Teams is usually that the job is simple: connect the app, receive messages, send messages back.
+The first instinct with Microsoft Teams is that the job is simple: connect the app, receive messages, send messages back.
 
-What actually helped was a different mental model:
+What actually helped was splitting that into three separate concerns: the bot side tells you something happened, Microsoft Graph gives you a richer view of the underlying data, and sending messages back is its own path with its own rules. I kept looking for one API that covered all of it, and the integration made a lot more sense once I stopped.
 
-- the bot side tells you that something happened
-- Microsoft Graph gives you a richer view of Teams data
-- sending messages back is its own concern
+## Bot Framework vs. Graph
 
-Once I stopped looking for one perfect API, the integration made a lot more sense.
-
-## The Split That Helped
-
-If you are building a Teams app, the useful question is not "Bot Framework or Graph?" It is "what is each one good at?"
-
-The split I like is:
+If you're building a Teams app, the more useful question isn't "Bot Framework or Graph," it's what each one is actually good at. The split that worked for me:
 
 - Bot Framework for incoming events and bot-authored replies
 - Microsoft Graph for reading teams, channels, users, messages, replies, and files
 
-That keeps the model clean.
-
-At a high level, I would build the first version in this order:
+For a first version, I'd build it roughly in this order:
 
 1. get tenant auth and permissions working
 2. receive a message event reliably
 3. normalize that event into your own internal message shape
-4. fetch richer context only when the raw event is not enough
+4. fetch richer context only when the raw event isn't enough
 5. send a reply back into the same conversation
-6. add edits, deletes, and attachment handling after the happy path works
+6. add edits, deletes, and attachment handling once the happy path works
 
-The important part is to avoid letting raw Teams payloads leak across your whole app.
+The main thing to avoid is letting raw Teams payloads leak across the rest of the app.
 
 ## What Gets Tricky Fast
 
-The Teams demo path is easy. The real work shows up in a few places:
+The demo path is easy. The real work shows up around threads, attachments, edits and deletes, and install or membership changes.
 
-- threads
-- attachments
-- edits and deletes
-- install and membership changes
-
-The most useful practical lesson was to treat inbound bot events as triggers, not as the whole source of truth. They tell you that something changed. Your app usually still needs a cleaner representation before running product logic on top of it.
-
-That is where Graph becomes useful. It gives you a more product-friendly way to think about workspace state instead of keeping everything in webhook mode.
+Treating inbound bot events as triggers rather than as the source of truth turned out to be the most useful lesson here. They tell you something changed; your app usually still needs a cleaner representation before running product logic on top of it. That's where Graph earns its place: it's a more product-friendly way to read workspace state than staying in webhook mode for everything.
 
 ## Attachments
 
-Attachments are the part I would plan for earlier than most people do.
+Attachments are the part I'd plan for earlier than most people do. Not every Teams attachment behaves the same way — a useful first split is files that come through the Bot Framework media path versus files that live in Teams or SharePoint and need Graph to resolve them. So the first move is normalizing, before anything gets downloaded.
 
-The main thing is that not every Teams attachment behaves the same way. A useful first split is:
+### Normalizing Attachments
 
-- files that come through the Bot Framework media path
-- files that live in the Teams or SharePoint file system and need Graph to resolve them
+In the raw event flow, the attachment list isn't ready to use as-is. Regular channel files usually arrive as references with a `contentUrl`. Inline images and some mobile-app images are trickier, and I found it useful to normalize those into the same shape as the regular file references before doing anything else — that kept the rest of the pipeline from caring where an attachment originally came from.
 
-That means the first step should be normalization, not download.
-
-### What Needed To Be Normalized First
-
-In the raw event flow, the attachment list is not always ready to use as-is.
-
-Regular channel files usually arrive as references with a `contentUrl`.
-
-Inline images and some mobile-app images are trickier. I found it useful to normalize those into the same attachment shape as the regular file references before doing anything else. That kept the rest of the pipeline from caring where the attachment originally came from.
-
-The normalized shape can stay very small:
+The normalized shape stays small:
 
 - `id`
 - `url`
@@ -78,9 +50,9 @@ The normalized shape can stay very small:
 - `size`
 - `mimetype`
 
-Once that shape exists, the rest of the app can treat attachments consistently.
+Once that exists, the rest of the app can treat attachments consistently.
 
-Here is the kind of normalization step that helped:
+Here's the normalization step that helped:
 
 ```ts
 async function normalizeTeamsAttachments(message, services) {
@@ -113,17 +85,11 @@ async function normalizeTeamsAttachments(message, services) {
 }
 ```
 
-That code shape came from a real constraint: I often wanted file size and content type before I actually downloaded the bytes.
+That shape came from a real constraint: I often wanted file size and content type before actually downloading the bytes.
 
-### Metadata Is A Separate Step
+### Metadata
 
-This is the part that made the flow much clearer.
-
-For Bot Framework media URLs, I used the bot token and made a streamed request just to read the headers. That gave me `content-length` and `content-type` without buffering the whole file.
-
-For Graph-backed files, I first resolved the `contentUrl` into a DriveItem download URL and then read the headers from there.
-
-So the metadata lookup was effectively:
+For Bot Framework media URLs, I used the bot token and made a streamed request just to read the headers, which gave me `content-length` and `content-type` without buffering the whole file. For Graph-backed files, I resolved the `contentUrl` into a DriveItem download URL first and read the headers from there. So the metadata lookup was effectively:
 
 ```ts
 async function getAttachmentMetadata(contentUrl) {
@@ -136,22 +102,11 @@ async function getAttachmentMetadata(contentUrl) {
 }
 ```
 
-The Graph resolution step is the awkward part. The `contentUrl` itself is not always the thing you want to download directly. The useful pattern is:
+Resolving the Graph side takes an extra hop. The `contentUrl` itself usually isn't something you can download directly — you turn it into a Graph share reference, ask Graph for the DriveItem behind it, and use the returned `@microsoft.graph.downloadUrl`. That's a lot more specific than "download the attachment," but the specificity is what stopped Teams integrations from feeling random.
 
-- turn the `contentUrl` into a Graph share reference
-- ask Graph for the DriveItem behind it
-- use the returned `@microsoft.graph.downloadUrl`
+### Downloading
 
-That is a lot more specific than "download the attachment," but that specificity is what makes Teams integrations stop feeling random.
-
-### Full Download Still Splits In Two
-
-Once metadata is normalized, the full download path becomes straightforward:
-
-- Bot Framework media URL: download with bot auth
-- Graph or SharePoint-backed file: resolve through Graph, then GET the bytes
-
-That left me with a simple download function:
+Once metadata is normalized, the full download path is straightforward: Bot Framework media URLs download with bot auth, Graph or SharePoint-backed files resolve through Graph and then GET the bytes.
 
 ```ts
 async function downloadAttachmentFile(attachment, services) {
@@ -169,28 +124,15 @@ async function downloadAttachmentFile(attachment, services) {
 }
 ```
 
-In practice I also gave the temp file a generated name so collisions would not overwrite earlier downloads in the same batch.
+I also gave the temp file a generated name so collisions wouldn't overwrite earlier downloads in the same batch.
 
-### Inline Images Pollute The Body Text
+### Inline Images
 
-One detail I would not skip: Teams message bodies can contain Graph image URLs inline.
+One detail worth not skipping: Teams message bodies can contain Graph image URLs inline. If you keep those raw URLs in the stored message text and also store the attachments separately, you end up double-counting the same image — search gets noisy, summarization gets noisy, and debugging the stored message gets harder than it needs to be. Cleaning the body text after the attachment list was already normalized avoided that.
 
-If you keep those raw URLs in the stored message text and also store the attachments separately, you end up double-counting the same image. Search gets noisy, summarization gets noisy, and debugging the stored message becomes harder than it should be.
+### Uploads
 
-So I found it worth cleaning the body text after the attachment list had already been normalized.
-
-### Uploads Go Through The Channel File Folder
-
-Uploading was clearer once I stopped expecting a single "send attachment" API.
-
-The reliable shape was:
-
-1. ask Graph for the channel's `filesFolder`
-2. upload the bytes into that folder's drive
-3. keep the returned file `id` and `webUrl`
-4. send the bot-authored message that points to the uploaded file
-
-That is roughly:
+Uploading got clearer once I stopped expecting a single "send attachment" API. The pattern that worked: ask Graph for the channel's `filesFolder`, upload the bytes into that folder's drive, keep the returned file `id` and `webUrl`, then send the bot-authored message pointing at the uploaded file.
 
 ```ts
 async function uploadFileToChannel(payload) {
@@ -211,49 +153,38 @@ async function uploadFileToChannel(payload) {
 }
 ```
 
-The random prefix matters more than it sounds. If you write directly to the folder with the original file name, duplicate names can overwrite each other.
+The random prefix matters more than it sounds — write directly to the folder with the original file name and duplicate names can overwrite each other. For outbound messages, Graph owns file storage and the bot owns the conversation message; keeping those as two separate actions instead of one made the responsibility split easier to reason about.
 
-For outbound messages, it helps to treat file upload and visible message send as two different actions:
+## The Overall Shape
 
-- Graph owns file storage
-- the bot owns the conversation message
+Stepping back from the specifics, and without getting into anything company-specific, this is roughly it.
 
-That keeps the responsibility boundary clean.
-
-## A Good High-Level Coding Shape
-
-Without getting into company-specific implementation, the coding shape looks like this:
-
-### Inbound
+**Inbound**
 
 1. receive the event
-2. identify whether it is message, edit, delete, install, or membership-related
+2. identify whether it's message, edit, delete, install, or membership-related
 3. fetch richer context if needed
 4. normalize it into your own model
 5. run your product logic
 
-### Outbound
+**Outbound**
 
-1. decide whether you are sending text, a card, or a file-backed message
+1. decide whether you're sending text, a card, or a file-backed message
 2. upload files first if needed
 3. send the visible bot message
 4. store enough identity to support later edits or deletes
 
-### Error Handling
-
-Plan for these from the beginning:
+**Error handling to plan for from the start:**
 
 - duplicate events
 - retries
 - partial attachment failures
 - edit and delete events arriving later
-- tenant permissions that look correct but are not fully usable yet
+- tenant permissions that look correct but aren't fully usable yet
 
 ## Testing
 
-If you want to try building this yourself, the easiest setup is a Microsoft 365 developer sandbox if you have access to one, or another disposable test tenant.
-
-Then test in this order:
+If you want to try building this yourself, the easiest setup is a Microsoft 365 developer sandbox, or another disposable test tenant. Then test in this order:
 
 1. connect the tenant and verify permissions
 2. install the bot into a team
@@ -262,4 +193,4 @@ Then test in this order:
 5. test screenshots, inline images, and file uploads
 6. add or remove users and make sure your assumptions still hold
 
-The main takeaway from building on top of Teams is that the platform becomes much less confusing once you stop expecting one surface to do everything.
+Steps 4 and 5 are where the demo path stops covering you.

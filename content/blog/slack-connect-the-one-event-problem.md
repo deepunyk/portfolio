@@ -8,24 +8,11 @@ published: true
 
 One Slack Connect behavior took longer to understand than it should have.
 
-The setup looked straightforward:
+The setup: workspace A had the app installed, workspace B had the same app installed, the channel was shared between the two, and both bot copies were sitting in it. I assumed a new message in that channel would fire two Events API deliveries, one per installation. It fired one.
 
-- workspace A had the app installed
-- workspace B had the same app installed
-- the channel was shared between the two workspaces
-- both bot copies were added to that shared channel
+Slack does document this, just not where I first went looking. The [Slack Connect guide](https://docs.slack.dev/apis/slack-connect/) says Events API handling has "No duplicated event triggering between shared channels." The [Events API docs](https://docs.slack.dev/apis/events-api/) explain that the outer payload carries only one `authorizations` entry even when the event is visible to multiple installations, and that getting the full set means calling [`apps.event.authorizations.list`](https://docs.slack.dev/reference/methods/apps.event.authorizations.list/).
 
-The natural assumption was that a new message in that channel would produce two Events API deliveries, one per workspace installation.
-
-That is not what happened.
-
-What showed up in testing was one delivery.
-
-Slack's docs do hint at this, but not in the exact product-shaped way I was looking for. The useful line is in the [Slack Connect guide](https://docs.slack.dev/apis/slack-connect/): Events API handling has "No duplicated event triggering between shared channels." The [Events API docs](https://docs.slack.dev/apis/events-api/) also explain that the outer payload contains only one `authorizations` entry even when the same event is visible to multiple installations, and that you need [`apps.event.authorizations.list`](https://docs.slack.dev/reference/methods/apps.event.authorizations.list/) to get the full set.
-
-That sounds small until your app is built around workspace-scoped processing.
-
-## The Awkward Part
+That matters once your app is built around workspace-scoped processing.
 
 A lot of Slack apps are modeled like this:
 
@@ -34,15 +21,9 @@ A lot of Slack apps are modeled like this:
 3. resolve workspace-specific config, users, and tokens
 4. run the rest of the app logic in that workspace context
 
-That works fine in ordinary channels.
+Fine in ordinary channels. In a Slack Connect channel where the app exists on both sides, that model leaks: you still get one event, but its business meaning may belong to more than one installation of your app.
 
-In a Slack Connect channel where the app exists on both sides, that model starts to leak. You still get one event, but the business meaning may belong to more than one installation of your app.
-
-From testing, the delivery consistently landed for the bot installation that had most recently been added to the shared channel. I have not found a Slack doc that guarantees that behavior, so I would treat it as an observation, not a contract. The important thing is the part Slack does document:
-
-- one event delivery is normal
-- the event may be visible to multiple installations
-- you need an extra API call to learn the full authorization set
+In testing, the delivery consistently landed for whichever bot copy had most recently been added to the shared channel. I have not found a doc that guarantees that, so treat it as an observation rather than a contract. What Slack does commit to is narrower: one delivery is normal, that delivery may be visible to more than one installation, and finding out which ones takes an extra call.
 
 ## What The Event Looks Like
 
@@ -83,15 +64,11 @@ Once Slack Connect is involved, the outer envelope becomes more important than t
 - `is_ext_shared_channel`: whether this happened in an externally shared channel
 - `context_team_id`: the workspace context Slack used for delivery
 
-That is the first mental shift that helped:
-
-The delivered event is not "the event for one workspace." It is "one delivery of an event that may be visible to more than one installation."
+The shift that helped: stop reading the delivered event as "the event for one workspace" and start reading it as one delivery that may be visible to more than one installation.
 
 ## The Docs Are Slightly Inconsistent
 
-There is one documentation wrinkle worth calling out because it is easy to get confused by it.
-
-The Slack Connect guide still refers to `authorized_users` in a few places. The current Events API envelope uses `authorizations` instead. The underlying idea is the same, but the practical implementation path today is:
+The Slack Connect guide still refers to `authorized_users` in a few places. The current Events API envelope uses `authorizations` instead. Same underlying idea, but the practical path today is:
 
 1. read the single delivered `authorizations` entry on the event
 2. use `event_context`
@@ -227,8 +204,6 @@ There are a few details here that are easy to miss:
 - Use the Conversations API for channel inspection. Slack Connect docs are pretty direct that shared-channel work should use `conversations.*`, not the older channel APIs.
 - Expect shared-channel oddities beyond delivery. Slack also documents channel ID changes during sharing, different privacy settings per workspace, and file events that arrive with `"file_access": "check_file_info"` in Slack Connect channels.
 
-That last one is worth remembering because shared-channel support usually grows one awkward edge at a time.
-
 ## What I Would Test Before Trusting It
 
 If I were implementing this from scratch, I would test this path very deliberately:
@@ -242,21 +217,6 @@ If I were implementing this from scratch, I would test this path very deliberate
 7. run your internal expansion step and verify both workspace-scoped pipelines process the message
 8. remove and re-add one bot copy if you want to test which installation Slack chooses for the single external delivery
 
-That last step is where I saw the "most recently added bot gets the event" pattern. Again, I would keep that framed as observed behavior, not as API contract.
+That last step is where I saw the "most recently added bot gets the event" pattern, still not something I'd call an API contract.
 
-## The Main Lesson
-
-The tricky part is not that Slack Connect hides information from you.
-
-The tricky part is that Slack delivers one event while many apps are built as if event delivery and workspace context are the same thing.
-
-In a shared channel, those are separate concerns.
-
-Once I treated the webhook as a delivery envelope, and not yet as a fully contextualized workspace event, the design got much simpler:
-
-- Slack delivery stays singular
-- authorization discovery becomes explicit
-- the ingestion edge duplicates or normalizes work
-- core app logic stays unchanged
-
-That ended up being the cleanest way to support the special case without letting Slack Connect assumptions spread through the rest of the system.
+Slack Connect doesn't hide information so much as it delivers one event while most apps are built assuming delivery and workspace context are the same thing. Once I stopped treating the webhook as a fully resolved workspace event and started treating it as a delivery envelope that might need expanding, the rest of the design fell out on its own: Slack keeps sending one event, authorization discovery happens explicitly at the edge, and the core app logic never finds out any of this happened.
