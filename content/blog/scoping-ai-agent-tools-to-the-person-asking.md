@@ -1,7 +1,7 @@
 ---
 title: "Scoping an AI Agent's Tools to the Person Asking"
 description: "How we let a support agent reset passwords and read HR records from Slack without trusting the model to stay on the right account."
-date: "2026-11-25"
+date: "2025-11-18"
 tags: ["ai-agents", "llm", "security", "integrations"]
 published: true
 ---
