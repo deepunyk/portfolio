@@ -3,14 +3,14 @@ title: "Moving Our Backend From ESLint to oxlint"
 description: "Commits went from 18 seconds to about one, and full-repo lint from 94 seconds to under six. The work was in keeping the rules we actually relied on."
 date: "2026-11-25"
 tags: ["typescript", "linting", "developer-tools", "agentic-development"]
-published: false
+published: true
 ---
 
 Every commit in our main backend repo took about 18 seconds before git let go of it. Most of that was ESLint.
 
 The pre-commit hook ran ESLint over the whole repository with `eslint-plugin-diff`, which reports only the lines you staged. Reporting less didn't mean doing less work, though. ESLint still had to build a TypeScript program for the whole repo, because one of our rules (`return-await`) needs type information. The hook needed `--max-old-space-size=4096` to avoid running out of memory, and it peaked around 2.5 GB.
 
-People had mostly learned to live with this. What made me look at it again was the coding agents. Our Claude and Codex configs had a post-edit hook that ran Prettier and then `npx eslint --fix` on every file an agent touched. ESLint on a single file still built the whole TypeScript program (opening one file cold in the editor took about 22 seconds and 3 GB), and the hook paid that on every edit. It also ended in `|| true`, so when the fix failed nobody saw it. We were paying for lint on every agent edit and getting no guarantee out of it.
+The coding agents made it worse. Our Claude and Codex configs had a post-edit hook that ran Prettier and then `npx eslint --fix` on every file an agent touched. ESLint on a single file still built the whole TypeScript program (opening one file cold in the editor took about 22 seconds and 3 GB), and the hook paid that on every edit. It also ended in `|| true`, so when the fix failed nobody saw it. We were paying for lint on every agent edit and getting no guarantee out of it.
 
 Nothing in CI checked lint or formatting either. If someone committed with `--no-verify`, or their hook broke, the violation just went to `main`.
 
@@ -66,5 +66,3 @@ Unused imports and unused variables are errors now (a `_` prefix is allowed for 
 Replacing Prettier with oxfmt reformatted about 207 files in one go. That's an unpleasant diff to review, especially when it touches hot paths. The review compared the ASTs of all 177 changed JS/TS files. Apart from imports, the only differences were `private declare` becoming `declare private`, and a leading `|` dropped from a union type.
 
 The one thing I couldn't fix from the repo had nothing to do with oxlint. Anyone whose user-level VS Code settings made Prettier the default TypeScript formatter kept getting Prettier on save, at 80 columns, fighting oxfmt in the commit hook. The fix was a settings change on each machine, which you can only put in the PR description and hope people read.
-
-<!-- TODO(Deepak): anything from the week after merge? Team reaction, a rule someone missed, a false positive, or whether agents behave differently without the post-edit hook. -->
