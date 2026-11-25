@@ -1,34 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f3eb;
-  --foreground: #162027;
-  --surface: #fffdf7;
-  --surface-strong: #fff9ee;
-  --muted: #55606b;
-  --border: #ddd3c4;
+  --background: #faf8f3;
+  --foreground: #1c1d1b;
+  --muted: #64655f;
+  --faint: #8f908a;
+  --border: #e4e0d6;
   --accent: #0f766e;
   --accent-strong: #115e59;
-  --highlight: #e8f1ec;
+  --code-bg: #f1ede4;
+  --pre-bg: #20262d;
+  --pre-fg: #f2f5f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #151614;
+    --foreground: #e9e7e1;
+    --muted: #a4a39c;
+    --faint: #7b7a74;
+    --border: #2c2d2a;
+    --accent: #5fbfb3;
+    --accent-strong: #84d3c9;
+    --code-bg: #24251f;
+    --pre-bg: #0e0f0e;
+    --pre-fg: #e9e7e1;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
   --font-serif: var(--font-newsreader);
   --font-mono: var(--font-jetbrains-mono);
+}
+
+html {
+  color-scheme: light dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  background-image:
-    radial-gradient(circle at 16% 14%, #fff8e8 0%, transparent 38%),
-    radial-gradient(circle at 80% 18%, #e8f2eb 0%, transparent 35%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(246, 243, 235, 0.95) 100%);
-  background-attachment: fixed;
-  font-family: var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 h1,
@@ -36,36 +51,28 @@ h2,
 h3,
 h4 {
   font-family: var(--font-newsreader), serif;
-  letter-spacing: -0.015em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 a {
-  transition: color 180ms ease;
+  transition: color 150ms ease;
 }
 
-.surface {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 0 6px 16px rgba(22, 32, 39, 0.04);
+/* Inline links inside prose */
+.prose-link {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
-.surface-strong {
-  background: var(--surface-strong);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 24px rgba(22, 32, 39, 0.06);
+.prose-link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
-.reveal {
-  animation: reveal-up 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
 }

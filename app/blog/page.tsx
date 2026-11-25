@@ -4,7 +4,7 @@ import Link from "next/link";
 import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Writing",
   description: "Write-ups of production bugs, integration quirks, and tooling changes from my own work.",
 };
 
@@ -12,61 +12,46 @@ export default function BlogPage() {
   const posts = getAllPostsMeta();
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-12 md:px-10">
-      <header className="space-y-3">
-        <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--accent)]">
-          Back to home
-        </Link>
-        <h1 className="text-4xl md:text-5xl">Writing</h1>
-        <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
-          Write-ups of production bugs, integration quirks, and tooling changes from my own
-          work, mostly at ClearFeed.
-        </p>
-      </header>
+    <main className="mx-auto w-full max-w-[640px] flex-1 px-5 pt-16 pb-20 md:pt-24">
+      <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--accent)]">
+        ← Deepak Nayak
+      </Link>
+      <h1 className="mt-8 text-3xl">Writing</h1>
+      <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
+        Write-ups of production bugs, integration quirks, and tooling changes from my own work,
+        mostly at ClearFeed.
+      </p>
 
-      <section className="space-y-4">
-        {posts.map((post) => (
-          <article key={post.slug} className="surface rounded-2xl p-5 md:p-6">
-            <p className="text-xs tracking-wider text-[var(--muted)] uppercase">
-              {formatPostDate(post.date)}
-              {post.externalUrl
-                ? post.source
-                  ? ` | ${post.source}`
-                  : ""
-                : post.readingMinutes
-                  ? ` | ${post.readingMinutes} min read`
-                  : ""}
-            </p>
-            <h2 className="mt-3 text-3xl">
+      <ul className="mt-10">
+        {posts.map((post) => {
+          const meta = post.externalUrl
+            ? `${formatPostDate(post.date)}${post.source ? ` · ${post.source} ↗` : ""}`
+            : `${formatPostDate(post.date)}${post.readingMinutes ? ` · ${post.readingMinutes} min` : ""}`;
+          const body = (
+            <>
+              <p className="font-mono text-xs text-[var(--faint)]">{meta}</p>
+              <h2 className="mt-1.5 font-sans text-[17px] leading-snug font-medium tracking-normal group-hover:text-[var(--accent)]">
+                {post.title}
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted)]">{post.description}</p>
+            </>
+          );
+          const className = "group block border-t border-[var(--border)] py-5";
+          return (
+            <li key={post.slug}>
               {post.externalUrl ? (
-                <a
-                  href={post.externalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[var(--accent)]"
-                >
-                  {post.title}
+                <a href={post.externalUrl} target="_blank" rel="noopener noreferrer" className={className}>
+                  {body}
                 </a>
               ) : (
-                <Link href={`/blog/${post.slug}`} className="hover:text-[var(--accent)]">
-                  {post.title}
+                <Link href={`/blog/${post.slug}`} className={className}>
+                  {body}
                 </Link>
               )}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.description}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <span
-                  key={`${post.slug}-${tag}`}
-                  className="rounded-full bg-[var(--highlight)] px-3 py-1 text-xs text-[var(--accent)]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </article>
-        ))}
-      </section>
+            </li>
+          );
+        })}
+      </ul>
     </main>
   );
 }
