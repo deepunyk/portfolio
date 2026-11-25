@@ -1,92 +1,97 @@
 export const profile = {
   name: "Deepak Nayak",
-  role: "Backend engineer, product builder, team lead",
+  role: "Lead Engineer, Backend · ClearFeed",
   location: "Bengaluru, India",
   email: "deepaknayakp@outlook.com",
   linkedin: "https://www.linkedin.com/in/deepak-nayak-in",
+  github: [
+    { label: "GitHub", url: "https://github.com/deepunyk" },
+    {
+      label: "GitHub (work)",
+      url: "https://github.com/deepaknyk",
+      title: "Most of this activity is in private repos",
+    },
+  ],
   summary:
-    "I like building products that solve a real problem and become hard to replace.",
+    "I was the first engineer at ClearFeed. Five years later I lead the backend team there.",
   detail:
-    "Most of my work is backend: integrations, sync paths, queues, retries, and the parts of a system that need to stay reliable. But I care just as much about whether the product is easy to use. If people cannot solve their problem cleanly, the backend work is not enough.",
-  note:
-    "I can build end to end when needed: talk to customers, understand the problem, design the system, write the code, test it, ship it, and see what changed after release.",
+    "ClearFeed is a helpdesk that lives inside Slack and Microsoft Teams. I wrote its backend from the first commit: the event pipeline, the ticketing model on top of chat, the sync with other ticketing tools, and lately the AI agents that resolve requests on their own. Most of what I know comes from keeping that system up while it grew.",
 };
 
-export const focusAreas = [
+export const work = [
   {
-    title: "Products People Settle Into",
+    title: "An event pipeline that can't lose messages",
     description:
-      "I like products that become part of the job instead of a thing people tolerate. The work is not just to ship features. It is to make the product useful enough, reliable enough, and clear enough that people keep leaning on it.",
+      "Everything in ClearFeed starts as an event from Slack, Teams, or some other tool. The pipeline now takes in more than 10 million a day at 99.99% uptime. Most of the work was in the failure paths: idempotency, retries, and rate limits from APIs that go down or throttle with no warning.",
+    posts: [
+      "the-sqs-long-poll-that-never-came-back",
+      "slack-connect-the-one-event-problem",
+    ],
   },
   {
-    title: "Backend Work With Product Consequences",
+    title: "Two-way sync with other ticketing tools",
     description:
-      "Most of the interesting problems for me are deep in the backend, but they always show up in the product eventually. Bad sync, slow jobs, unclear state, or brittle integrations always leak outward. I like fixing those at the root.",
+      "Zendesk, Jira, Salesforce, HubSpot, GitHub, Linear, and Freshdesk. Tickets, comments, and status changes move both ways in real time. Each API has its own ideas about IDs, webhooks, and what counts as an update, and those differences cause most of the bugs.",
+    posts: ["building-on-top-of-microsoft-teams"],
   },
   {
-    title: "Systems That Need Shape",
+    title: "AI agents that take real actions",
     description:
-      "I tend to get pulled toward situations where the problem is still fuzzy, the boundaries are not clear yet, and several parts of the system are involved. That is usually where I do my best work.",
+      "A framework where customers build support agents out of tools, workflows, and post-action hooks, with RAG over their own docs. It auto-resolves about 40% of incoming tickets and does things like reset an Okta password without a human in the loop.",
+    posts: [],
   },
   {
-    title: "Teams That Need Hands-On Leadership",
+    title: "Growing the team",
     description:
-      "Sometimes the right move is to go heads down on a hard problem. Sometimes it is to lead, set direction, make tradeoffs visible, and help the team move with more confidence. I like being useful in either mode.",
-  },
-];
-
-export const workModes = [
-  {
-    title: "I can take a product from a vague problem to a shipped system.",
-    description:
-      "That usually means talking to customers, understanding what is actually painful, figuring out the system boundaries, building the backend and product flow, then staying close enough to learn what changed after release.",
-  },
-  {
-    title: "I can go very deep on one stubborn engineering problem.",
-    description:
-      "Some work needs broad ownership. Some work needs patience. I am comfortable staying with one difficult issue long enough to understand the failure modes, simplify the design, and make it reliable again.",
-  },
-  {
-    title: "I can lead without drifting too far from the work.",
-    description:
-      "I like leading teams in a hands-on way: reviewing designs, unblocking difficult decisions, helping engineers get sharper around ambiguous backend work, and stepping in directly when the problem needs it.",
+      "I went from the only engineer to leading a backend team of 15. These days coding agents write first drafts, run reviews, and open PRs, and engineers still own the design and the final call on what ships.",
+    posts: [
+      "rethinking-typescript-checks-for-agentic-development",
+      "one-source-of-truth-global-instructions-for-coding-agents",
+    ],
   },
 ];
 
 export const timeline = [
   {
     company: "ClearFeed",
-    title: "Lead Engineer",
+    title: "Lead Engineer, Backend",
     period: "Mar 2024 - Present",
     detail:
-      "I lead backend engineering here now. The work stays close to the system: shaping product and integration flows, reviewing difficult designs, improving engineering habits, and helping the team turn unclear requirements into something we can trust in production.",
+      "I lead the backend team, which is 15 engineers now. I still review the hard designs and write code. I also set up how the team works with coding agents.",
   },
   {
     company: "ClearFeed",
     title: "Founding Engineer",
     period: "Aug 2021 - Mar 2024",
     detail:
-      "I joined as the first engineer and built the backend from scratch. Ticketing on top of Slack and Teams, sync with tools like Zendesk, Jira, and Salesforce, event pipelines for analytics and SLAs, and early automation features that could classify requests, draft responses, create tickets, and trigger actions across other systems.",
+      "First engineer. I built the backend from scratch: ticketing on top of Slack and Teams conversations (assignments, custom fields, SLAs, triage queues), the event pipeline, and the first sync integrations with Zendesk, Jira, and Salesforce.",
   },
   {
     company: "JaanSay",
-    title: "Contract Full Stack Developer",
+    title: "Full-Stack Engineer (Contract)",
     period: "Aug 2020 - Jul 2021",
     detail:
-      "Part of a two-person tech team building a hyperlocal platform from scratch with Flutter, Node.js, Nginx, and a tiny DigitalOcean budget. We handled product work, deployment, scaling, and customer onboarding ourselves, so every technical decision had to be simple and cheap enough to live with.",
+      "One of two engineers on a hyperlocal community app (events, RSVPs, donations, rewards) built with Flutter and Node.js. We did the deploys and the scaling ourselves on a small DigitalOcean budget, since the startup had no funding. It reached 300+ local businesses and 10,000+ users.",
   },
   {
     company: "3D Usher",
-    title: "Contract Full Stack Developer",
+    title: "Full-Stack Engineer (Contract)",
     period: "Dec 2020 - Feb 2021",
     detail:
-      "Built a geometry-aware instant quoting system for 3D manufacturing instead of the usual bounding-box shortcuts. I had to learn enough about materials, manufacturing constraints, and pricing logic to make the Three.js interface and quoting flow produce numbers customers could actually trust.",
+      "Built an instant-quoting engine for 3D manufacturing that read the geometry of an uploaded part (holes, grooves, complex features) with Three.js, where competitors priced only the outer shape. Zetwerk cited it as a key reason for acqui-hiring the company.",
+    post: "using-threejs-for-instant-quoting-at-3d-usher",
   },
   {
     company: "Dreamsoft Innovations",
     title: "Software Engineer Intern",
     period: "Apr 2020 - Oct 2020",
     detail:
-      "My first serious production work. I built the Flutter side of a kids' digital library app, handled responsive UI across devices, and wired Flutter into a Unity-based story engine so the app experience and backend stayed in sync.",
+      "My first production work: the Flutter side of MojiBooks, a children's reading app, wired into a Unity-based story engine so the two runtimes could talk to each other on phones and tablets.",
   },
 ];
+
+export const education = {
+  school: "Visvesvaraya Technological University (VTU)",
+  degree: "B.E. in Computer Science",
+  period: "2017 - 2021",
+};

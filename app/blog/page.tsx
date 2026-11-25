@@ -5,7 +5,7 @@ import { formatPostDate, getAllPostsMeta } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Notes from building backend systems, integrations, and the parts that only make sense after shipping them.",
+  description: "Write-ups of production bugs, integration quirks, and tooling changes from my own work.",
 };
 
 export default function BlogPage() {
@@ -19,8 +19,8 @@ export default function BlogPage() {
         </Link>
         <h1 className="text-4xl md:text-5xl">Writing</h1>
         <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
-          Notes from work that taught me something concrete: integrations, backend systems,
-          and the awkward details that only show up once the product is live.
+          Write-ups of production bugs, integration quirks, and tooling changes from my own
+          work, mostly at ClearFeed.
         </p>
       </header>
 

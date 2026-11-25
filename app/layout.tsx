@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: "%s | Deepak Nayak",
   },
   description:
-    "Portfolio of Deepak Nayak: backend systems, product-minded engineering, and writing about the awkward edges that show up in real software.",
+    "Deepak Nayak, founding engineer and backend lead at ClearFeed. Notes on event pipelines, ticketing integrations, AI agents in production, and developer tooling.",
   icons: {
     icon: [{ url: "/site-icon.svg", type: "image/svg+xml" }],
     shortcut: "/site-icon.svg",
